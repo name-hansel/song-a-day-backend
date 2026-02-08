@@ -15,13 +15,15 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
 	private final OAuthSuccessHandler successHandler;
 	private final JWTFilter jwtFilter;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity httpSecurity) {
 		httpSecurity.csrf((csrf) -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/me").authenticated().anyRequest().permitAll())
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/me", "/api/me/player").authenticated()
+						.anyRequest().permitAll())
 				.oauth2Login(oauth -> oauth.successHandler(successHandler))
 				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 				.logout(l -> l.logoutUrl("/api/logout").logoutSuccessHandler(((request, response, authentication) -> {

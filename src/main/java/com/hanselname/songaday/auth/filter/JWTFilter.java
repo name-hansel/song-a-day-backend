@@ -12,7 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.hanselname.songaday.auth.service.JWTService;
 import com.hanselname.songaday.auth.utils.AuthUtils;
 import com.hanselname.songaday.user.entity.AppUser;
-import com.hanselname.songaday.user.repository.UserRepository;
+import com.hanselname.songaday.user.repository.AppUserRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 	private final JWTService jwtService;
-	private final UserRepository userRepository;
+	private final AppUserRepository userRepository;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
