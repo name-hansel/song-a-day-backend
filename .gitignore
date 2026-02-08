@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 application.yml
+.metadata
 
 ### STS ###
 .apt_generated
