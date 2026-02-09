@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.hanselname.songaday.auth.service.JWTService;
 import com.hanselname.songaday.auth.utils.AuthUtils;
+import com.hanselname.songaday.spotify.util.SpotifyUtils;
 import com.hanselname.songaday.user.entity.AppUser;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 
@@ -45,20 +46,23 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 		OAuth2AuthorizedClient client = clientService
 				.loadAuthorizedClient(oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
-		String spotifyId = oauthUser.getAttribute("id");
-		AppUser user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(AppUser::new);
+		String spotifyId = oauthUser.getAttribute(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
+		AppUser user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
+			AppUser newUser = new AppUser();
+			newUser.setSpotifyId(spotifyId);
+			newUser.setSpotifyEmail(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
+			newUser.setSpotifyDisplayName(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME));
 
-		// todo: only for new users?
-		user.setSpotifyId(spotifyId);
-		user.setEmail(oauthUser.getAttribute("email"));
-		user.setDisplayName(oauthUser.getAttribute("display_name"));
-		user.setAccessToken(client.getAccessToken().getTokenValue());
-		user.setRefreshToken(client.getRefreshToken().getTokenValue());
-		user.setTokenExpiresAt(client.getAccessToken().getExpiresAt());
+			return newUser;
+		});
+
+		user.setSpotifyAccessToken(client.getAccessToken().getTokenValue());
+		user.setSpotifyRefreshToken(client.getRefreshToken().getTokenValue());
+		user.setSpotifyTokenExpiresAt(client.getAccessToken().getExpiresAt());
 
 		appUserRepository.save(user);
 
-		Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, jwtService.generate(user.getId()));
+		Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, jwtService.generate(user.getUuid()));
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
 		cookie.setMaxAge((int) (expiration / 100));

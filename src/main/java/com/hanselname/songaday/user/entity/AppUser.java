@@ -12,26 +12,28 @@ import jakarta.persistence.Id;
 public class AppUser {
 	@Id
 	@GeneratedValue
-	private UUID id;
+	private UUID uuid;
 
 	private String spotifyId;
-	private String displayName;
-	private String email;
+
+	private String spotifyDisplayName;
+
+	private String spotifyEmail;
 
 	@Column(length = 2000)
-	private String accessToken;
+	private String spotifyAccessToken;
 
 	@Column(length = 2000)
-	private String refreshToken;
+	private String spotifyRefreshToken;
 
-	private Instant tokenExpiresAt;
+	private Instant spotifyTokenExpiresAt;
 
-	public UUID getId() {
-		return id;
+	public UUID getUuid() {
+		return uuid;
 	}
 
-	public void setId(UUID id) {
-		this.id = id;
+	public void setUuid(UUID uuid) {
+		this.uuid = uuid;
 	}
 
 	public String getSpotifyId() {
@@ -42,44 +44,44 @@ public class AppUser {
 		this.spotifyId = spotifyId;
 	}
 
-	public String getDisplayName() {
-		return displayName;
+	public String getSpotifyDisplayName() {
+		return spotifyDisplayName;
 	}
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setSpotifyDisplayName(String spotifyDisplayName) {
+		this.spotifyDisplayName = spotifyDisplayName;
 	}
 
-	public String getEmail() {
-		return email;
+	public String getSpotifyEmail() {
+		return spotifyEmail;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setSpotifyEmail(String spotifyEmail) {
+		this.spotifyEmail = spotifyEmail;
 	}
 
-	public String getAccessToken() {
-		return accessToken;
+	public String getSpotifyAccessToken() {
+		return spotifyAccessToken;
 	}
 
-	public void setAccessToken(String accessToken) {
-		this.accessToken = accessToken;
+	public void setSpotifyAccessToken(String spotifyAccessToken) {
+		this.spotifyAccessToken = spotifyAccessToken;
 	}
 
-	public String getRefreshToken() {
-		return refreshToken;
+	public String getSpotifyRefreshToken() {
+		return spotifyRefreshToken;
 	}
 
-	public void setRefreshToken(String refreshToken) {
-		this.refreshToken = refreshToken;
+	public void setSpotifyRefreshToken(String spotifyRefreshToken) {
+		this.spotifyRefreshToken = spotifyRefreshToken;
 	}
 
-	public Instant getTokenExpiresAt() {
-		return tokenExpiresAt;
+	public Instant getSpotifyTokenExpiresAt() {
+		return spotifyTokenExpiresAt;
 	}
 
-	public void setTokenExpiresAt(Instant tokenExpiresAt) {
-		this.tokenExpiresAt = tokenExpiresAt;
+	public void setSpotifyTokenExpiresAt(Instant spotifyTokenExpiresAt) {
+		this.spotifyTokenExpiresAt = spotifyTokenExpiresAt;
 	}
 
 }

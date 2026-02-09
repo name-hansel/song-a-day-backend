@@ -21,7 +21,7 @@ public class SpotifyService {
 		AppUser user = (AppUser) authentication.getPrincipal();
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setBearerAuth(user.getAccessToken());
+		headers.setBearerAuth(user.getSpotifyAccessToken());
 		return new RestTemplate().exchange("https://api.spotify.com/v1/me/player/currently-playing", HttpMethod.GET,
 				new HttpEntity<>(headers), Map.class).getBody();
 	}
