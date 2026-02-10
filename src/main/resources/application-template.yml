@@ -5,9 +5,12 @@ spring:
     application:
         name: song a day
     datasource:
-        url: jdbc:h2:mem:testdb
-        driver-class-name: org.h2.Driver
+        url: jdbc:postgresql://localhost:5432/songaday
+        username: <>
+        password: <>
+        driver-class-name: org.postgresql.Driver
     jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
         hibernate:
             ddl-auto: update
         show-sql: true
@@ -17,9 +20,9 @@ spring:
                 registration:
                     spotify:
                         client-id: <>
-                        scope: user-read-email,user-read-private
+                        scope: user-read-email,user-read-private,user-read-currently-playing
                         authorization-grant-type: authorization_code
-                        redirect-uri: <>
+                        redirect-uri: http://127.0.0.1:8080/login/oauth2/code/spotify
                         client-authentication-method: none
                 provider:
                     spotify:
