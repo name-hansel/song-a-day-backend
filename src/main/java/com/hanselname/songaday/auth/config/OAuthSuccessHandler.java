@@ -1,7 +1,13 @@
 package com.hanselname.songaday.auth.config;
 
-import java.io.IOException;
-
+import com.hanselname.songaday.auth.service.JWTService;
+import com.hanselname.songaday.auth.utils.AuthUtils;
+import com.hanselname.songaday.spotify.util.SpotifyUtils;
+import com.hanselname.songaday.user.entity.AppUser;
+import com.hanselname.songaday.user.repository.AppUserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -11,63 +17,56 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.hanselname.songaday.auth.service.JWTService;
-import com.hanselname.songaday.auth.utils.AuthUtils;
-import com.hanselname.songaday.spotify.util.SpotifyUtils;
-import com.hanselname.songaday.user.entity.AppUser;
-import com.hanselname.songaday.user.repository.AppUserRepository;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-	@Value("${app.jwt.expiration}")
-	private long expiration;
+    @Value("${app.jwt.expiration}")
+    private long expiration;
 
-	@Value("${app.frontend-url}")
-	private String frontendUrl;
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
-	private final AppUserRepository appUserRepository;
-	private final JWTService jwtService;
-	private final OAuth2AuthorizedClientService clientService;
+    private final AppUserRepository appUserRepository;
+    private final JWTService jwtService;
+    private final OAuth2AuthorizedClientService clientService;
 
-	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-			Authentication authentication) throws IOException, ServletException {
+    public OAuthSuccessHandler(AppUserRepository appUserRepository, JWTService jwtService, OAuth2AuthorizedClientService clientService) {
+        this.appUserRepository = appUserRepository;
+        this.jwtService = jwtService;
+        this.clientService = clientService;
+    }
 
-		OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-		OAuth2User oauthUser = oauthToken.getPrincipal();
-		OAuth2AuthorizedClient client = clientService
-				.loadAuthorizedClient(oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
-		String spotifyId = oauthUser.getAttribute(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
-		AppUser user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
-			AppUser newUser = new AppUser();
-			newUser.setSpotifyId(spotifyId);
-			newUser.setSpotifyEmail(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
-			newUser.setSpotifyDisplayName(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME));
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2User oauthUser = oauthToken.getPrincipal();
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
-			return newUser;
-		});
+        String spotifyId = oauthUser.getAttribute(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
+        AppUser user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
+            AppUser newUser = new AppUser();
+            newUser.setSpotifyId(spotifyId);
+            newUser.setSpotifyEmail(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
+            newUser.setSpotifyDisplayName(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME));
 
-		user.setSpotifyAccessToken(client.getAccessToken().getTokenValue());
-		user.setSpotifyRefreshToken(client.getRefreshToken().getTokenValue());
-		user.setSpotifyTokenExpiresAt(client.getAccessToken().getExpiresAt());
+            return newUser;
+        });
 
-		appUserRepository.save(user);
+        user.setSpotifyAccessToken(client.getAccessToken().getTokenValue());
+        user.setSpotifyRefreshToken(client.getRefreshToken().getTokenValue());
+        user.setSpotifyTokenExpiresAt(client.getAccessToken().getExpiresAt());
 
-		Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, jwtService.generate(user.getUuid()));
-		cookie.setHttpOnly(true);
-		cookie.setPath("/");
-		cookie.setMaxAge((int) (expiration / 100));
+        appUserRepository.save(user);
 
-		response.addCookie(cookie);
-		getRedirectStrategy().sendRedirect(request, response, frontendUrl);
-	}
+        Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, jwtService.generate(user.getUuid()));
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge((int) (expiration / 100));
+
+        response.addCookie(cookie);
+        getRedirectStrategy().sendRedirect(request, response, frontendUrl);
+    }
 }
