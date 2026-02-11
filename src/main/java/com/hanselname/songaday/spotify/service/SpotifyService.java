@@ -1,24 +1,46 @@
 package com.hanselname.songaday.spotify.service;
 
+import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.spotify.dto.TrackDTO;
+import com.hanselname.songaday.spotify.mapper.TrackMapper;
+import com.hanselname.songaday.spotify.response_model.SpotifySearch;
+import com.hanselname.songaday.spotify.response_model.Track;
 import com.hanselname.songaday.user.entity.AppUser;
-import org.springframework.http.HttpEntity;
+import jakarta.annotation.Nonnull;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SpotifyService {
 
-    public Map<String, Object> getCurrentTrack(Authentication authentication) {
+    private final TrackMapper trackMapper;
+    private final WebClient webClient;
+
+    public SpotifyService(TrackMapper trackMapper, WebClient webClient) {
+        this.trackMapper = trackMapper;
+        this.webClient = webClient;
+    }
+
+    public List<TrackDTO> searchForTrack(Authentication authentication, @Nonnull String searchQuery) {
         AppUser user = (AppUser) authentication.getPrincipal();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(user.getSpotifyAccessToken());
-        return new RestTemplate().exchange("https://api.spotify.com/v1/me/player/currently-playing", HttpMethod.GET,
-                new HttpEntity<>(headers), Map.class).getBody();
+
+        SpotifySearch searchResponse = webClient.get().uri(uriBuilder -> uriBuilder.path(CommonUtils.SPOTIFY_BASE_URL).path("/search").queryParam("q", searchQuery).queryParam("type", "track").queryParam("limit", "5").build()).retrieve().bodyToMono(SpotifySearch.class).block();
+        return extractTracks(searchResponse).stream().map(trackMapper::toDTO).collect(Collectors.toList());
+    }
+
+    private List<Track> extractTracks(SpotifySearch searchResult) {
+        if (searchResult == null || searchResult.getTracks() == null) {
+            return List.of();
+        }
+
+        return searchResult.getTracks().getItems();
     }
 }
