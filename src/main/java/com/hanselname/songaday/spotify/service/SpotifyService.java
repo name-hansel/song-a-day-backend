@@ -1,5 +1,6 @@
 package com.hanselname.songaday.spotify.service;
 
+import com.hanselname.songaday.auth.service.SpotifyTokenService;
 import com.hanselname.songaday.common.CommonUtils;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.mapper.TrackSearchMapper;
@@ -19,17 +20,19 @@ public class SpotifyService {
 
     private final TrackSearchMapper trackSearchMapper;
     private final WebClient webClient;
+    private final SpotifyTokenService spotifyTokenService;
 
-    public SpotifyService(TrackSearchMapper trackSearchMapper, WebClient.Builder builder) {
+    public SpotifyService(TrackSearchMapper trackSearchMapper, SpotifyTokenService spotifyTokenService) {
         this.trackSearchMapper = trackSearchMapper;
-        this.webClient = builder.baseUrl(CommonUtils.SPOTIFY_BASE_URL).build();
+        this.spotifyTokenService = spotifyTokenService;
+        this.webClient = WebClient.builder().baseUrl(CommonUtils.SPOTIFY_BASE_URL).build();
     }
 
     public List<TrackSearchDTO> searchForTrack(Authentication authentication, @Nonnull String searchQuery) {
-        AppUser user = (AppUser) authentication.getPrincipal();
+        AppUser appUser = (AppUser) authentication.getPrincipal();
 
         SpotifySearch searchResponse = webClient.get().uri(uriBuilder -> uriBuilder.path("/search").queryParam("q", searchQuery).queryParam("type", "track").queryParam("limit", "5").build()).headers(headers -> {
-            headers.setBearerAuth(user.getSpotifyAccessToken());
+            headers.setBearerAuth(spotifyTokenService.getValidAccessToken(appUser));
         }).retrieve().bodyToMono(SpotifySearch.class).block();
         return extractTracks(searchResponse).stream().map(trackSearchMapper::toDTO).collect(Collectors.toList());
     }
