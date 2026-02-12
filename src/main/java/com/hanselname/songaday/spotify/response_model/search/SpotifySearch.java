@@ -1,4 +1,4 @@
-package com.hanselname.songaday.spotify.response_model;
+package com.hanselname.songaday.spotify.response_model.search;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ public class SpotifySearch {
     }
 
     public static class TrackContainer {
-        private List<Track> items;
+        private List<TrackSearch> items;
 
-        public List<Track> getItems() {
+        public List<TrackSearch> getItems() {
             return items;
         }
     }

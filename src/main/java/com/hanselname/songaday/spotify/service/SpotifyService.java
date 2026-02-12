@@ -3,8 +3,8 @@ package com.hanselname.songaday.spotify.service;
 import com.hanselname.songaday.common.CommonUtils;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.mapper.TrackSearchMapper;
-import com.hanselname.songaday.spotify.response_model.SpotifySearch;
-import com.hanselname.songaday.spotify.response_model.Track;
+import com.hanselname.songaday.spotify.response_model.search.SpotifySearch;
+import com.hanselname.songaday.spotify.response_model.search.TrackSearch;
 import com.hanselname.songaday.user.entity.AppUser;
 import jakarta.annotation.Nonnull;
 import org.springframework.security.core.Authentication;
@@ -34,7 +34,7 @@ public class SpotifyService {
         return extractTracks(searchResponse).stream().map(trackSearchMapper::toDTO).collect(Collectors.toList());
     }
 
-    private List<Track> extractTracks(SpotifySearch searchResult) {
+    private List<TrackSearch> extractTracks(SpotifySearch searchResult) {
         if (searchResult == null || searchResult.getTracks() == null) {
             return List.of();
         }
