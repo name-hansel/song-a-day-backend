@@ -17,11 +17,6 @@ public class SpotifyController {
         this.spotifyService = spotifyService;
     }
 
-    @GetMapping("/me/player")
-    public ResponseEntity<?> currentTrack(Authentication authentication) {
-        return ResponseEntity.ok(spotifyService.getCurrentTrack(authentication));
-    }
-
     @GetMapping("/search-track")
     public ResponseEntity<?> searchForTrack(Authentication authentication, @RequestParam(name = "q") String searchQuery) {
         return ResponseEntity.ok(spotifyService.searchForTrack(authentication, searchQuery));
