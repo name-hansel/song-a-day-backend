@@ -45,4 +45,9 @@ public class SongController {
         songService.deleteSongOfDay(appUserEntity.getUuid());
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping
+    public ResponseEntity<SongResponseDTO> updateSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.OK).body(songService.updateSongOfDay(appUserEntity, request));
+    }
 }

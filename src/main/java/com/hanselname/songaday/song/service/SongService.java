@@ -64,6 +64,14 @@ public class SongService {
         songRepository.deleteByAppUserUuidAndSongDate(appUserUuid, LocalDate.now());
     }
 
+    @Transactional
+    public SongResponseDTO updateSongOfDay(AppUserEntity appUserEntity, SongRequestDTO request) {
+        SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), LocalDate.now()).orElseThrow(() -> new RuntimeException("Song not logged"));
+        songEntity.setSpotifyId(request.spotifyId());
+
+        return getSongResponseDTO(appUserEntity, songEntity);
+    }
+
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
         TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity, songEntity.getSpotifyId());
 
