@@ -15,6 +15,7 @@ public class SongEntity extends AbstractEntity {
     private UUID uuid;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "app_user_entity_uuid", nullable = false)
     private AppUserEntity appUser;
 
     @Column(nullable = false)
@@ -22,4 +23,36 @@ public class SongEntity extends AbstractEntity {
 
     @Column(nullable = false)
     private LocalDate songDate;
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public AppUserEntity getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUserEntity appUser) {
+        this.appUser = appUser;
+    }
+
+    public String getSpotifyId() {
+        return spotifyId;
+    }
+
+    public void setSpotifyId(String spotifyId) {
+        this.spotifyId = spotifyId;
+    }
+
+    public LocalDate getSongDate() {
+        return songDate;
+    }
+
+    public void setSongDate(LocalDate songDate) {
+        this.songDate = songDate;
+    }
 }

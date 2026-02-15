@@ -1,5 +1,6 @@
 package com.hanselname.songaday.user.controller;
 
+import com.hanselname.songaday.common.CommonUtils;
 import com.hanselname.songaday.spotify.util.SpotifyUtils;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import org.springframework.security.core.Authentication;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/app-user")
+@RequestMapping(path = CommonUtils.AUTH_USER_API_PREFIX)
 public class UserController {
 
     @GetMapping("/me")
