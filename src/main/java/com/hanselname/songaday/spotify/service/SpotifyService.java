@@ -8,6 +8,7 @@ import com.hanselname.songaday.spotify.response_model.search.SpotifySearch;
 import com.hanselname.songaday.spotify.response_model.search.TrackSearch;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import jakarta.annotation.Nonnull;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,7 +35,14 @@ public class SpotifyService {
         SpotifySearch searchResponse = webClient.get().uri(uriBuilder -> uriBuilder.path("/search").queryParam("q", searchQuery).queryParam("type", "track").queryParam("limit", "5").build()).headers(headers -> {
             headers.setBearerAuth(spotifyTokenService.getValidAccessToken(appUserEntity));
         }).retrieve().bodyToMono(SpotifySearch.class).block();
+
         return extractTracks(searchResponse).stream().map(trackSearchMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId) {
+        TrackSearch track = webClient.get().uri(uriBuilder -> uriBuilder.path("/tracks/").path(spotifyId).build()).header(HttpHeaders.AUTHORIZATION, "Bearer " + spotifyTokenService.getValidAccessToken(appUserEntity)).retrieve().bodyToMono(TrackSearch.class).block();
+
+        return trackSearchMapper.toDTO(track);
     }
 
     private List<TrackSearch> extractTracks(SpotifySearch searchResult) {

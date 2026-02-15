@@ -1,7 +1,8 @@
 package com.hanselname.songaday.song.controller;
 
 import com.hanselname.songaday.common.CommonUtils;
-import com.hanselname.songaday.song.dto.SongLogDTO;
+import com.hanselname.songaday.song.dto.SongRequestDTO;
+import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.service.SongService;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import org.springframework.http.HttpStatus;
@@ -20,16 +21,17 @@ public class SongController {
     }
 
     @GetMapping("/{day}-{month}-{year}")
-    public ResponseEntity<?> getSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @PathVariable(name = "day") int dayOfMonth, @PathVariable int month, @PathVariable int year) {
+    public ResponseEntity<SongResponseDTO> getSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @PathVariable(name = "day") int dayOfMonth, @PathVariable int month, @PathVariable int year) {
         try {
-            return ResponseEntity.ok(songService.getSongOfDay(appUserEntity.getUuid(), dayOfMonth, month, year));
+            return ResponseEntity.ok(songService.getSongOfDay(appUserEntity, dayOfMonth, month, year));
         } catch (Exception exc) {
-            return ResponseEntity.badRequest().body(exc.getMessage());
+            // TODO: handle messages
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> logSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongLogDTO request) {
+    public ResponseEntity<SongResponseDTO> logSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(songService.logSongOfDay(appUserEntity.getUuid(), request));
     }
 }
