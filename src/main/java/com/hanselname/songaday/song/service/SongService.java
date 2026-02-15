@@ -10,6 +10,7 @@ import com.hanselname.songaday.spotify.service.SpotifyService;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -32,10 +33,13 @@ public class SongService {
         this.songMapper = songMapper;
     }
 
-    public SongResponseDTO getSongOfDay(AppUserEntity appUserEntity, int day, int month, int year) {
-        Optional<SongEntity> songEntity = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), LocalDate.of(year, month, day));
+    public SongResponseDTO getSongOfDay(AppUserEntity appUserEntity) {
+        LocalDate today = LocalDate.now();
+        return getSongOfDay(appUserEntity, today.getDayOfMonth(), today.getMonthValue(), today.getYear());
+    }
 
-        return songEntity.map(song -> getSongResponseDTO(appUserEntity, song)).orElse(null);
+    public SongResponseDTO getSongOfDay(AppUserEntity appUserEntity, int day, int month, int year) {
+        return songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), LocalDate.of(year, month, day)).map(song -> getSongResponseDTO(appUserEntity, song)).orElse(null);
     }
 
     public SongResponseDTO logSongOfDay(UUID appUserUuid, SongRequestDTO request) {
@@ -52,7 +56,12 @@ public class SongService {
         songEntity.setSpotifyId(request.spotifyId());
         songEntity.setSongDate(LocalDate.now());
 
-        return getSongResponseDTO(appUserEntity, songEntity);
+        return getSongResponseDTO(appUserEntity, songRepository.save(songEntity));
+    }
+
+    @Transactional
+    public void deleteSongOfDay(UUID appUserUuid) {
+        songRepository.deleteByAppUserUuidAndSongDate(appUserUuid, LocalDate.now());
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {

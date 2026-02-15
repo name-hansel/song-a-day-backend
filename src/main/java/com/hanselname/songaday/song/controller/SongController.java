@@ -30,8 +30,19 @@ public class SongController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<SongResponseDTO> getSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity) {
+        return ResponseEntity.ok(songService.getSongOfDay(appUserEntity));
+    }
+
     @PostMapping
     public ResponseEntity<SongResponseDTO> logSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(songService.logSongOfDay(appUserEntity.getUuid(), request));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity) {
+        songService.deleteSongOfDay(appUserEntity.getUuid());
+        return ResponseEntity.noContent().build();
     }
 }
