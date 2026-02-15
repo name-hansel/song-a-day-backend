@@ -1,7 +1,7 @@
 package com.hanselname.songaday.song.controller;
 
 import com.hanselname.songaday.common.CommonUtils;
-import com.hanselname.songaday.song.dto.SongRequestDTO;
+import com.hanselname.songaday.song.dto.SongLogDTO;
 import com.hanselname.songaday.song.service.SongService;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ public class SongController {
     }
 
     @PostMapping
-    public ResponseEntity<?> saveSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(songService.createSongOfDay(appUserEntity.getUuid(), request));
+    public ResponseEntity<?> logSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongLogDTO request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(songService.logSongOfDay(appUserEntity.getUuid(), request));
     }
 }

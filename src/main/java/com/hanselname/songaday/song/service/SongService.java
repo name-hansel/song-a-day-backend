@@ -1,6 +1,6 @@
 package com.hanselname.songaday.song.service;
 
-import com.hanselname.songaday.song.dto.SongRequestDTO;
+import com.hanselname.songaday.song.dto.SongLogDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
 import com.hanselname.songaday.song.repository.SongRepository;
 import com.hanselname.songaday.user.entity.AppUserEntity;
@@ -28,14 +28,15 @@ public class SongService {
     }
 
     // TODO: Return DTO
-    public Optional<SongEntity> createSongOfDay(UUID appUserUuid, SongRequestDTO request) {
+    public Optional<SongEntity> logSongOfDay(UUID appUserUuid, SongLogDTO request) {
         AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
 
         // TODO: Duplicate check?
+        // TODO: timezone handling
         SongEntity songEntity = new SongEntity();
         songEntity.setAppUser(appUserEntity);
         songEntity.setSpotifyId(request.spotifyId());
-        songEntity.setSongDate(LocalDate.of(request.year(), request.month(), request.day()));
+        songEntity.setSongDate(LocalDate.now());
 
         return Optional.of(songRepository.save(songEntity));
     }
