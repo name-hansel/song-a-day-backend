@@ -2,7 +2,7 @@ package com.hanselname.songaday.auth.filter;
 
 import com.hanselname.songaday.auth.service.JWTService;
 import com.hanselname.songaday.auth.utils.AuthUtils;
-import com.hanselname.songaday.user.entity.AppUser;
+import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,17 +29,15 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals(AuthUtils.COOKIE_NAME)) {
                     UUID userUUID = jwtService.validate(cookie.getValue());
-                    AppUser user = userRepository.findById(userUUID).orElse(null);
+                    AppUserEntity user = userRepository.findById(userUUID).orElse(null);
 
                     if (user != null) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user,
-                                null, List.of());
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, List.of());
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 }

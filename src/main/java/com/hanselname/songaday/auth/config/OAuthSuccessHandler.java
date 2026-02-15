@@ -3,7 +3,7 @@ package com.hanselname.songaday.auth.config;
 import com.hanselname.songaday.auth.service.JWTService;
 import com.hanselname.songaday.auth.utils.AuthUtils;
 import com.hanselname.songaday.spotify.util.SpotifyUtils;
-import com.hanselname.songaday.user.entity.AppUser;
+import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,8 +46,8 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
         String spotifyId = oauthUser.getAttribute(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
-        AppUser user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
-            AppUser newUser = new AppUser();
+        AppUserEntity user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
+            AppUserEntity newUser = new AppUserEntity();
             newUser.setSpotifyId(spotifyId);
             newUser.setSpotifyEmail(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
             newUser.setSpotifyDisplayName(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME));

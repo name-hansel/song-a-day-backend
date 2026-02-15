@@ -1,12 +1,11 @@
 package com.hanselname.songaday.user.repository;
 
+import com.hanselname.songaday.user.entity.AppUserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.hanselname.songaday.user.entity.AppUser;
-
-public interface AppUserRepository extends JpaRepository<AppUser, UUID> {
-	Optional<AppUser> findBySpotifyId(String spotifyId);
+public interface AppUserRepository extends JpaRepository<AppUserEntity, UUID> {
+    Optional<AppUserEntity> findBySpotifyId(String spotifyId);
 }
