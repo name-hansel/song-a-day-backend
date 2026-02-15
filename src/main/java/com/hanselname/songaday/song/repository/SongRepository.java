@@ -8,5 +8,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface SongRepository extends JpaRepository<SongEntity, UUID> {
-    Optional<SongEntity> findBySongDate(LocalDate date);
+    Optional<SongEntity> findByAppUserUuidAndSongDate(UUID appUserUuid, LocalDate date);
 }

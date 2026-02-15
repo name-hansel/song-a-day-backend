@@ -15,7 +15,7 @@ public class SongEntity extends AbstractEntity {
     private UUID uuid;
 
     @ManyToOne(optional = false)
-    private AppUserEntity appUserEntity;
+    private AppUserEntity appUser;
 
     @Column(nullable = false)
     private String spotifyId;
