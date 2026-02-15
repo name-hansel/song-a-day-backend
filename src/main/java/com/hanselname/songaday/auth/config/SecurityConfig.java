@@ -24,17 +24,12 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) {
-        httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.requestMatchers(CommonUtils.AUTH_USER_API_PREFIX + "/**").authenticated()
-                        .anyRequest().permitAll())
-                .oauth2Login(oauth -> oauth.successHandler(successHandler))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(l -> l.logoutUrl(CommonUtils.API_PREFIX + "/logout").logoutSuccessHandler(((request, response, authentication) -> {
-                    Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, "");
-                    cookie.setMaxAge(0);
-                    cookie.setPath("/");
-                    response.addCookie(cookie);
-                })));
+        httpSecurity.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(auth -> auth.requestMatchers(CommonUtils.AUTH_USER_API_PREFIX + "/**", CommonUtils.SONG_API_PREFIX + "/**").authenticated().anyRequest().permitAll()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).logout(l -> l.logoutUrl(CommonUtils.API_PREFIX + "/logout").logoutSuccessHandler(((request, response, authentication) -> {
+            Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, "");
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        })));
 
         return httpSecurity.build();
     }
