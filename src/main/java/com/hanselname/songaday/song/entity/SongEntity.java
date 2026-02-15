@@ -1,6 +1,6 @@
 package com.hanselname.songaday.song.entity;
 
-import com.hanselname.songaday.common.AbstractEntity;
+import com.hanselname.songaday.common.entity.AbstractEntity;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import jakarta.persistence.*;
 

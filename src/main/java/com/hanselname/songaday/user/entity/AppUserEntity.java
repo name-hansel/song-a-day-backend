@@ -1,6 +1,6 @@
 package com.hanselname.songaday.user.entity;
 
-import com.hanselname.songaday.common.AbstractEntity;
+import com.hanselname.songaday.common.entity.AbstractEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
