@@ -28,7 +28,7 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) {
         httpSecurity.csrf(AbstractHttpConfigurer::disable).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        })).authorizeHttpRequests(auth -> auth.requestMatchers("/oauth2/**").permitAll().anyRequest().authenticated()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).logout(l -> l.logoutUrl(CommonUtils.API_PREFIX + "/logout").logoutSuccessHandler(((request, response, authentication) -> {
+        })).authorizeHttpRequests(auth -> auth.requestMatchers("/oauth2/**", "/error").permitAll().anyRequest().authenticated()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class).logout(l -> l.logoutUrl(CommonUtils.API_PREFIX + "/logout").logoutSuccessHandler(((request, response, authentication) -> {
             Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, "");
             cookie.setMaxAge(0);
             cookie.setPath("/");
