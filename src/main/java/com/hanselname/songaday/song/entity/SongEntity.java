@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"app_user_entity_uuid", "song_date"})})
 public class SongEntity extends AbstractEntity {
 
     @GeneratedValue

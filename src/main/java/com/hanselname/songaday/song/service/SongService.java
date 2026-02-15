@@ -30,6 +30,11 @@ public class SongService {
     // TODO: Return DTO
     public Optional<SongEntity> logSongOfDay(UUID appUserUuid, SongLogDTO request) {
         AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
+        Optional<SongEntity> existingSongOfDay = songRepository.findByAppUserUuidAndSongDate(appUserUuid, LocalDate.now());
+
+        if (existingSongOfDay.isPresent()) {
+            throw new RuntimeException("Already logged for the day");
+        }
 
         // TODO: Duplicate check?
         // TODO: timezone handling
