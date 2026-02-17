@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class SongService {
@@ -34,16 +35,19 @@ public class SongService {
         this.songMapper = songMapper;
     }
 
-    public SongResponseDTO getSongOfDay(AppUserEntity appUserEntity) {
+    public SongResponseDTO getSongOfDay(UUID appUserUuid) {
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         LocalDate today = getLocalDateForUser(appUserEntity);
-        return getSongOfDay(appUserEntity, today.getDayOfMonth(), today.getMonthValue(), today.getYear());
+        return getSongOfDay(appUserEntity.getUuid(), today.getDayOfMonth(), today.getMonthValue(), today.getYear());
     }
 
-    public SongResponseDTO getSongOfDay(AppUserEntity appUserEntity, int day, int month, int year) {
-        return songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), LocalDate.of(year, month, day)).map(song -> getSongResponseDTO(appUserEntity, song)).orElse(null);
+    public SongResponseDTO getSongOfDay(UUID appUserUuid, int day, int month, int year) {
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+        return songRepository.findByAppUserUuidAndSongDate(appUserUuid, LocalDate.of(year, month, day)).map(song -> getSongResponseDTO(appUserEntity, song)).orElse(null);
     }
 
-    public SongResponseDTO logSongOfDay(AppUserEntity appUserEntity, SongRequestDTO request) {
+    public SongResponseDTO logSongOfDay(UUID appUserUuid, SongRequestDTO request) {
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         LocalDate today = getLocalDateForUser(appUserEntity);
 
         Optional<SongEntity> existingSongOfDay = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), today);
@@ -61,12 +65,14 @@ public class SongService {
     }
 
     @Transactional
-    public void deleteSongOfDay(AppUserEntity appUserEntity) {
+    public void deleteSongOfDay(UUID appUserUuid) {
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         songRepository.deleteByAppUserUuidAndSongDate(appUserEntity.getUuid(), getLocalDateForUser(appUserEntity));
     }
 
     @Transactional
-    public SongResponseDTO updateSongOfDay(AppUserEntity appUserEntity, SongRequestDTO request) {
+    public SongResponseDTO updateSongOfDay(UUID appUserUuid, SongRequestDTO request) {
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), getLocalDateForUser(appUserEntity)).orElseThrow(() -> new RuntimeException("Song not logged"));
         songEntity.setSpotifyId(request.spotifyId());
 
@@ -85,5 +91,9 @@ public class SongService {
 
     private LocalDate getLocalDateForUser(AppUserEntity appUserEntity) {
         return ZonedDateTime.now(ZoneId.of(appUserEntity.getTimezone())).toLocalDate();
+    }
+
+    private AppUserEntity getAppUserEntityByUuid(UUID appUserUuid) {
+        return appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
     }
 }

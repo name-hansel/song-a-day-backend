@@ -1,23 +1,29 @@
 package com.hanselname.songaday.user.controller;
 
 import com.hanselname.songaday.common.CommonUtils;
-import com.hanselname.songaday.spotify.util.SpotifyUtils;
-import com.hanselname.songaday.user.entity.AppUserEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.hanselname.songaday.user.dto.UserTimezoneRequestDTO;
+import com.hanselname.songaday.user.dto.UserTimezoneResponseDTO;
+import com.hanselname.songaday.user.service.UserService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path = CommonUtils.AUTH_USER_API_PREFIX)
 public class UserController {
 
-    @GetMapping("/me")
-    public Map<String, Object> me(Authentication auth) {
-        AppUserEntity user = (AppUserEntity) auth.getPrincipal();
+    private final UserService userService;
 
-        return Map.of(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME, user.getSpotifyId(), SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME, user.getSpotifyDisplayName(), SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME, user.getSpotifyEmail());
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PatchMapping("/time-zone")
+    public UserTimezoneResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody UserTimezoneRequestDTO request) {
+        return userService.updateUserTimezone(appUserUuid, request.timezone());
     }
 }
