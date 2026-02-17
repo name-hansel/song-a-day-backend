@@ -37,12 +37,12 @@ public class SongController {
 
     @PostMapping
     public ResponseEntity<SongResponseDTO> logSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity, @RequestBody SongRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(songService.logSongOfDay(appUserEntity.getUuid(), request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(songService.logSongOfDay(appUserEntity, request));
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteSongOfDay(@AuthenticationPrincipal AppUserEntity appUserEntity) {
-        songService.deleteSongOfDay(appUserEntity.getUuid());
+        songService.deleteSongOfDay(appUserEntity);
         return ResponseEntity.noContent().build();
     }
 

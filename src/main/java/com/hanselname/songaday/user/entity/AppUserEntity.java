@@ -1,5 +1,6 @@
 package com.hanselname.songaday.user.entity;
 
+import com.hanselname.songaday.common.CommonUtils;
 import com.hanselname.songaday.common.entity.AbstractEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,6 +29,9 @@ public class AppUserEntity extends AbstractEntity {
     private String spotifyRefreshToken;
 
     private Instant spotifyTokenExpiresAt;
+
+    @Column(nullable = false)
+    private String timezone = CommonUtils.DEFAULT_TIME_ZONE_ID;
 
     public UUID getUuid() {
         return uuid;
@@ -85,4 +89,11 @@ public class AppUserEntity extends AbstractEntity {
         this.spotifyTokenExpiresAt = spotifyTokenExpiresAt;
     }
 
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
 }

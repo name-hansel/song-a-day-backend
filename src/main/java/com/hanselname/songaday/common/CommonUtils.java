@@ -6,4 +6,5 @@ public class CommonUtils {
     public static final String SONG_API_PREFIX = "/api/song-a-day";
     public static final String SPOTIFY_BASE_URL = "https://api.spotify.com/v1";
     public static final String SPOTIFY_ACCOUNTS_TOKEN_URL = "https://accounts.spotify.com/api/token";
+    public static final String DEFAULT_TIME_ZONE_ID = "Etc/Greenwich";
 }
