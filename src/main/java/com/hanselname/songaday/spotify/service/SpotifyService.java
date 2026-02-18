@@ -9,6 +9,7 @@ import com.hanselname.songaday.spotify.response_model.search.TrackSearch;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.annotation.Nonnull;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,6 +41,7 @@ public class SpotifyService {
         return extractTracks(searchResponse).stream().map(trackSearchMapper::toDTO).collect(Collectors.toList());
     }
 
+    @Cacheable(value = "spotify:track", key = "#spotifyId")
     public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId) {
         TrackSearch track = webClient.get().uri(uriBuilder -> uriBuilder.path("/tracks/").path(spotifyId).build()).header(HttpHeaders.AUTHORIZATION, "Bearer " + spotifyTokenService.getValidAccessToken(appUserEntity)).retrieve().bodyToMono(TrackSearch.class).block();
 
