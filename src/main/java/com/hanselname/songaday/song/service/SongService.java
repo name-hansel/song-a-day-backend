@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -50,16 +49,15 @@ public class SongService {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         LocalDate today = getLocalDateForUser(appUserEntity);
 
-        Optional<SongEntity> existingSongOfDay = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), today);
+        SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), today).orElseGet(() -> {
+            SongEntity newSongEntity = new SongEntity();
+            newSongEntity.setAppUser(appUserEntity);
+            newSongEntity.setSongDate(today);
 
-        if (existingSongOfDay.isPresent()) {
-            throw new RuntimeException("Already logged for the day");
-        }
+            return newSongEntity;
+        });
 
-        SongEntity songEntity = new SongEntity();
-        songEntity.setAppUser(appUserEntity);
         songEntity.setSpotifyId(request.spotifyId());
-        songEntity.setSongDate(today);
 
         return getSongResponseDTO(appUserEntity, songRepository.save(songEntity));
     }

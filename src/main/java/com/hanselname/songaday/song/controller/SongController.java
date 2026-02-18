@@ -4,7 +4,6 @@ import com.hanselname.songaday.common.CommonUtils;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.service.SongService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -31,19 +30,14 @@ public class SongController {
         return songService.getSongOfDay(appUserUuid);
     }
 
-    @PostMapping
-    public ResponseEntity<SongResponseDTO> logSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody SongRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(songService.logSongOfDay(appUserUuid, request));
+    @PutMapping
+    public SongResponseDTO logSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody SongRequestDTO request) {
+        return songService.logSongOfDay(appUserUuid, request);
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deleteSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
         songService.deleteSongOfDay(appUserUuid);
         return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping
-    public SongResponseDTO updateSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody SongRequestDTO request) {
-        return songService.updateSongOfDay(appUserUuid, request);
     }
 }
