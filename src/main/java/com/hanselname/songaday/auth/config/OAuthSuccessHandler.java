@@ -1,14 +1,14 @@
 package com.hanselname.songaday.auth.config;
 
 import com.hanselname.songaday.auth.service.JWTService;
-import com.hanselname.songaday.auth.utils.AuthUtils;
+import com.hanselname.songaday.auth.utils.CookieUtils;
 import com.hanselname.songaday.spotify.util.SpotifyUtils;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -22,20 +22,19 @@ import java.io.IOException;
 @Component
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    @Value("${app.jwt.expiration}")
-    private long expiration;
-
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
     private final AppUserRepository appUserRepository;
     private final JWTService jwtService;
     private final OAuth2AuthorizedClientService clientService;
+    private final CookieUtils cookieUtils;
 
-    public OAuthSuccessHandler(AppUserRepository appUserRepository, JWTService jwtService, OAuth2AuthorizedClientService clientService) {
+    public OAuthSuccessHandler(AppUserRepository appUserRepository, JWTService jwtService, OAuth2AuthorizedClientService clientService, CookieUtils cookieUtils) {
         this.appUserRepository = appUserRepository;
         this.jwtService = jwtService;
         this.clientService = clientService;
+        this.cookieUtils = cookieUtils;
     }
 
     @Override
@@ -46,7 +45,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
         String spotifyId = oauthUser.getAttribute(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
-        AppUserEntity user = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
+        AppUserEntity appUserEntity = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
             AppUserEntity newUser = new AppUserEntity();
             newUser.setSpotifyId(spotifyId);
             newUser.setSpotifyEmail(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
@@ -55,18 +54,20 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
             return newUser;
         });
 
-        user.setSpotifyAccessToken(client.getAccessToken().getTokenValue());
-        user.setSpotifyRefreshToken(client.getRefreshToken().getTokenValue());
-        user.setSpotifyTokenExpiresAt(client.getAccessToken().getExpiresAt());
+        // Spotify tokens
+        appUserEntity.setSpotifyAccessToken(client.getAccessToken().getTokenValue());
+        appUserEntity.setSpotifyRefreshToken(client.getRefreshToken().getTokenValue());
+        appUserEntity.setSpotifyTokenExpiresAt(client.getAccessToken().getExpiresAt());
 
-        appUserRepository.save(user);
+        appUserRepository.save(appUserEntity);
 
-        Cookie cookie = new Cookie(AuthUtils.COOKIE_NAME, jwtService.generate(user.getUuid()));
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (expiration / 100));
+        // Tokens for frontend
+        String accessToken = jwtService.generateAccessToken(appUserEntity.getUuid());
+        String refreshToken = jwtService.generateRefreshToken(appUserEntity.getUuid());
 
-        response.addCookie(cookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(accessToken).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(refreshToken).toString());
+
         getRedirectStrategy().sendRedirect(request, response, frontendUrl);
     }
 }

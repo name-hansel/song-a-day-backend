@@ -1,12 +1,11 @@
 package com.hanselname.songaday.auth.filter;
 
 import com.hanselname.songaday.auth.service.JWTService;
-import com.hanselname.songaday.auth.utils.AuthUtils;
+import com.hanselname.songaday.auth.utils.CookieUtils;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,25 +21,24 @@ import java.util.UUID;
 public class JWTFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
     private final AppUserRepository userRepository;
+    private final CookieUtils cookieUtils;
 
-    public JWTFilter(JWTService jwtService, AppUserRepository userRepository) {
+    public JWTFilter(JWTService jwtService, AppUserRepository userRepository, CookieUtils cookieUtils) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.cookieUtils = cookieUtils;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(AuthUtils.COOKIE_NAME)) {
-                    UUID userUUID = jwtService.validate(cookie.getValue());
-                    AppUserEntity user = userRepository.findById(userUUID).orElse(null);
+        String accessToken = cookieUtils.extractAccessToken(request);
+        if (accessToken != null) {
+            UUID appUserUuid = jwtService.validateAccessToken(accessToken);
+            AppUserEntity appUserEntity = userRepository.findById(appUserUuid).orElse(null);
 
-                    if (user != null) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null, List.of());
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    }
-                }
+            if (appUserEntity != null) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(appUserEntity, null, List.of());
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
