@@ -49,4 +49,8 @@ public class JWTService {
     public UUID validateAccessToken(String token) {
         return UUID.fromString(Jwts.parserBuilder().setSigningKey(accessTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
     }
+
+    public UUID validateRefreshToken(String token) {
+        return UUID.fromString(Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
+    }
 }

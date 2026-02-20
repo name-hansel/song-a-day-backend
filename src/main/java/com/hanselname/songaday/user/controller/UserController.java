@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(path = CommonUtils.AUTH_USER_API_PREFIX)
+@RequestMapping(path = CommonUtils.USER_API_PREFIX)
 public class UserController {
 
     private final UserService userService;
