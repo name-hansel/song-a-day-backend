@@ -26,8 +26,8 @@ public class FilterChainConfig {
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) {
         httpSecurity.csrf(AbstractHttpConfigurer::disable).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(Customizer.withDefaults()).exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        })).authorizeHttpRequests(auth -> auth.requestMatchers("/oauth2/**", "/error", "/api/auth/refresh-access-token", "/api/auth/logout").permitAll().anyRequest().authenticated()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        
+        })).authorizeHttpRequests(auth -> auth.requestMatchers("/oauth2/**", "/error", "/api/auth/**").permitAll().anyRequest().authenticated()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return httpSecurity.build();
     }
 }
