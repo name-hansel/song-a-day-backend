@@ -5,7 +5,7 @@ spring:
   application:
     name: song a day
   datasource:
-    url: jdbc:postgresql://localhost:5432/songaday
+    url: <>
     username: <>
     password: <>
     driver-class-name: org.postgresql.Driver
@@ -28,7 +28,7 @@ spring:
             client-id: <>
             scope: user-read-email
             authorization-grant-type: authorization_code
-            redirect-uri: <>
+            redirect-uri: http://127.0.0.1:8080/login/oauth2/code/spotify
             client-authentication-method: none
         provider:
           spotify:
@@ -38,6 +38,8 @@ spring:
             user-name-attribute: id
 app:
   jwt:
-    secret: <>
-    expiration: <>
-  frontend-url: <>
+    access-token-secret: <>
+    refresh-token-secret: <>
+    access-token-expiration-seconds: <>
+    refresh-token-expiration-seconds: <>
+  frontend-url: http://127.0.0.1:3000/dashboard
