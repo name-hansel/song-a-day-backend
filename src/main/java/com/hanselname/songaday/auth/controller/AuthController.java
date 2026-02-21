@@ -26,13 +26,14 @@ public class AuthController {
         this.refreshTokenService = refreshTokenService;
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/refresh-access-token")
     public ResponseEntity<Void> refreshAccessToken(HttpServletRequest request) {
-        String refreshToken = cookieUtils.extractRefreshToken(request);
-        UUID appUserUuid = jwtService.validateRefreshToken(refreshToken);
+        String oldRefreshToken = cookieUtils.extractRefreshToken(request);
+        UUID appUserUuid = refreshTokenService.validateRefreshToken(oldRefreshToken);
+        refreshTokenService.deleteRefreshToken(oldRefreshToken);
 
         String newAccessToken = jwtService.generateAccessToken(appUserUuid);
-        String newRefreshToken = refreshTokenService.generateRefreshTokenForUser(appUserUuid);
+        String newRefreshToken = refreshTokenService.generateRefreshTokenForAppUser(appUserUuid);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(newAccessToken).toString()).header(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(newRefreshToken).toString()).build();
     }

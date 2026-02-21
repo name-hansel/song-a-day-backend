@@ -66,7 +66,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         // Tokens for frontend
         String accessToken = jwtService.generateAccessToken(appUserEntity.getUuid());
-        String refreshToken = refreshTokenService.generateRefreshTokenForUser(appUserEntity.getUuid());
+        String refreshToken = refreshTokenService.generateRefreshTokenForAppUser(appUserEntity.getUuid());
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(accessToken).toString());
         response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(refreshToken).toString());

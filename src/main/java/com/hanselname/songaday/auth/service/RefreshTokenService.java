@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -20,18 +21,38 @@ public class RefreshTokenService {
         this.repository = repository;
     }
 
-    public String generateRefreshTokenForUser(UUID appUserUuid) {
+    public String generateRefreshTokenForAppUser(UUID appUserUuid) {
         String refreshToken = jwtService.generateRefreshToken(appUserUuid);
-        String jti = jwtService.extractJtiFromRefreshToken(refreshToken);
 
         RefreshTokenEntity refreshTokenEntity = new RefreshTokenEntity();
-        refreshTokenEntity.setUuid(UUID.fromString(jti));
+        refreshTokenEntity.setUuid(jwtService.extractJtiFromRefreshToken(refreshToken));
         refreshTokenEntity.setAppUserUuid(appUserUuid);
         refreshTokenEntity.setTokenHash(hashToken(refreshToken));
         refreshTokenEntity.setExpiresAt(jwtService.extractExpiresAtFromRefreshToken(refreshToken));
         repository.save(refreshTokenEntity);
 
         return refreshToken;
+    }
+
+    public UUID validateRefreshToken(String token) {
+        // TODO: Else, throw invalidtokenexception
+        RefreshTokenEntity responseTokenEntity = repository.findById(jwtService.extractJtiFromRefreshToken(token)).orElseThrow(IllegalStateException::new);
+
+        if (responseTokenEntity.getExpiresAt().isBefore(Instant.now())) {
+            // TODO: Should logout the user
+            throw new IllegalStateException("Refresh token expired");
+        }
+
+        if (!hashToken(token).equals(responseTokenEntity.getTokenHash())) {
+            // TODO: Should logout the user
+            throw new IllegalStateException("Refresh token invalid");
+        }
+
+        return responseTokenEntity.getAppUserUuid();
+    }
+
+    public void deleteRefreshToken(String oldToken) {
+        repository.deleteById(jwtService.extractJtiFromRefreshToken(oldToken));
     }
 
     private String hashToken(String token) {

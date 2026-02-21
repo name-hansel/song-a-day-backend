@@ -50,12 +50,8 @@ public class JWTService {
         return UUID.fromString(Jwts.parserBuilder().setSigningKey(accessTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
     }
 
-    public UUID validateRefreshToken(String token) {
-        return UUID.fromString(Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
-    }
-
-    public String extractJtiFromRefreshToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getId();
+    public UUID extractJtiFromRefreshToken(String token) {
+        return UUID.fromString(Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getId());
     }
 
     public Instant extractExpiresAtFromRefreshToken(String token) {
