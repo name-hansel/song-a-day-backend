@@ -1,6 +1,7 @@
 package com.hanselname.songaday.auth.controller;
 
 import com.hanselname.songaday.auth.service.JWTService;
+import com.hanselname.songaday.auth.service.RefreshTokenService;
 import com.hanselname.songaday.auth.utils.CookieUtils;
 import com.hanselname.songaday.common.CommonUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,10 +18,12 @@ import java.util.UUID;
 public class AuthController {
     private final CookieUtils cookieUtils;
     private final JWTService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthController(CookieUtils cookieUtils, JWTService jwtService) {
+    public AuthController(CookieUtils cookieUtils, JWTService jwtService, RefreshTokenService refreshTokenService) {
         this.cookieUtils = cookieUtils;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/refresh")
@@ -29,7 +32,7 @@ public class AuthController {
         UUID appUserUuid = jwtService.validateRefreshToken(refreshToken);
 
         String newAccessToken = jwtService.generateAccessToken(appUserUuid);
-        String newRefreshToken = jwtService.generateRefreshToken(appUserUuid);
+        String newRefreshToken = refreshTokenService.generateRefreshTokenForUser(appUserUuid);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(newAccessToken).toString()).header(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(newRefreshToken).toString()).build();
     }

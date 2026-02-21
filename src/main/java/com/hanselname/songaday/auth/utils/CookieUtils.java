@@ -48,7 +48,7 @@ public class CookieUtils {
 //                             .secure(true)
                              .path(path)
 //                             .sameSite(sameSite)
-                             .maxAge(secondsToExpiry / 100).build();
+                             .maxAge(secondsToExpiry).build();
     }
 
     private String extract(HttpServletRequest request, String name) {

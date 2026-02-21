@@ -1,6 +1,7 @@
 package com.hanselname.songaday.auth.config;
 
 import com.hanselname.songaday.auth.service.JWTService;
+import com.hanselname.songaday.auth.service.RefreshTokenService;
 import com.hanselname.songaday.auth.utils.CookieUtils;
 import com.hanselname.songaday.spotify.util.SpotifyUtils;
 import com.hanselname.songaday.user.entity.AppUserEntity;
@@ -27,12 +28,14 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final AppUserRepository appUserRepository;
     private final JWTService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final OAuth2AuthorizedClientService clientService;
     private final CookieUtils cookieUtils;
 
-    public OAuthSuccessHandler(AppUserRepository appUserRepository, JWTService jwtService, OAuth2AuthorizedClientService clientService, CookieUtils cookieUtils) {
+    public OAuthSuccessHandler(AppUserRepository appUserRepository, JWTService jwtService, RefreshTokenService refreshTokenService, OAuth2AuthorizedClientService clientService, CookieUtils cookieUtils) {
         this.appUserRepository = appUserRepository;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
         this.clientService = clientService;
         this.cookieUtils = cookieUtils;
     }
@@ -63,7 +66,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         // Tokens for frontend
         String accessToken = jwtService.generateAccessToken(appUserEntity.getUuid());
-        String refreshToken = jwtService.generateRefreshToken(appUserEntity.getUuid());
+        String refreshToken = refreshTokenService.generateRefreshTokenForUser(appUserEntity.getUuid());
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(accessToken).toString());
         response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(refreshToken).toString());

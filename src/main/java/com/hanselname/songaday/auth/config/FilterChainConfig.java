@@ -14,13 +14,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-public class SecurityConfig {
+public class FilterChainConfig {
 
     private final OAuthSuccessHandler successHandler;
     private final JWTFilter jwtFilter;
     private final CookieUtils cookieUtils;
 
-    public SecurityConfig(OAuthSuccessHandler successHandler, JWTFilter jwtFilter, CookieUtils cookieUtils) {
+    public FilterChainConfig(OAuthSuccessHandler successHandler, JWTFilter jwtFilter, CookieUtils cookieUtils) {
         this.successHandler = successHandler;
         this.jwtFilter = jwtFilter;
         this.cookieUtils = cookieUtils;

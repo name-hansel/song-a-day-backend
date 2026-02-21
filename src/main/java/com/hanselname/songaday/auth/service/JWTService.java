@@ -39,11 +39,11 @@ public class JWTService {
     }
 
     public String generateAccessToken(UUID appUserUuid) {
-        return Jwts.builder().setSubject(appUserUuid.toString()).claim(JWT_TYPE, ACCESS_TOKEN_TYPE).setExpiration(Date.from(Instant.now().plusSeconds(accessTokenExpirationSeconds))).signWith(accessTokenKey(), SignatureAlgorithm.HS256).compact();
+        return Jwts.builder().setId(UUID.randomUUID().toString()).setSubject(appUserUuid.toString()).claim(JWT_TYPE, ACCESS_TOKEN_TYPE).setExpiration(Date.from(Instant.now().plusSeconds(accessTokenExpirationSeconds))).signWith(accessTokenKey(), SignatureAlgorithm.HS256).compact();
     }
 
     public String generateRefreshToken(UUID appUserUuid) {
-        return Jwts.builder().setSubject(appUserUuid.toString()).claim(JWT_TYPE, REFRESH_TOKEN_TYPE).setExpiration(Date.from(Instant.now().plusSeconds(refreshTokenExpirationSeconds))).signWith(refreshTokenKey(), SignatureAlgorithm.HS256).compact();
+        return Jwts.builder().setId(UUID.randomUUID().toString()).setSubject(appUserUuid.toString()).claim(JWT_TYPE, REFRESH_TOKEN_TYPE).setExpiration(Date.from(Instant.now().plusSeconds(refreshTokenExpirationSeconds))).signWith(refreshTokenKey(), SignatureAlgorithm.HS256).compact();
     }
 
     public UUID validateAccessToken(String token) {
@@ -52,5 +52,13 @@ public class JWTService {
 
     public UUID validateRefreshToken(String token) {
         return UUID.fromString(Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
+    }
+
+    public String extractJtiFromRefreshToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getId();
+    }
+
+    public Instant extractExpiresAtFromRefreshToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(refreshTokenKey()).build().parseClaimsJws(token).getBody().getExpiration().toInstant();
     }
 }
