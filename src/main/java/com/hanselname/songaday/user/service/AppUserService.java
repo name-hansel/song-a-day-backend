@@ -3,6 +3,7 @@ package com.hanselname.songaday.user.service;
 import com.hanselname.songaday.user.dto.AppUserTimezoneResponseDTO;
 import com.hanselname.songaday.user.dto.AuthAppUserResponseDTO;
 import com.hanselname.songaday.user.entity.AppUserEntity;
+import com.hanselname.songaday.user.exception.UserNotFoundException;
 import com.hanselname.songaday.user.mapper.AppUserMapper;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class AppUserService {
 
     @Transactional
     public AppUserTimezoneResponseDTO updateUserTimezone(UUID appUserUuid, String newTimezone) {
-        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
+        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(UserNotFoundException::new);
 
         if (!ZoneId.getAvailableZoneIds().contains(newTimezone)) {
             throw new RuntimeException("Invalid timezone");
@@ -35,7 +36,7 @@ public class AppUserService {
     }
 
     public AuthAppUserResponseDTO getAppUser(UUID appUserUuid) {
-        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
+        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(UserNotFoundException::new);
         return appUserMapper.toDTO(appUserEntity);
     }
 }

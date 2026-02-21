@@ -1,5 +1,7 @@
 package com.hanselname.songaday.auth.service;
 
+import com.hanselname.songaday.auth.exception.AccessTokenExpiredException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -47,7 +49,11 @@ public class JWTService {
     }
 
     public UUID validateAccessToken(String token) {
-        return UUID.fromString(Jwts.parserBuilder().setSigningKey(accessTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
+        try {
+            return UUID.fromString(Jwts.parserBuilder().setSigningKey(accessTokenKey()).build().parseClaimsJws(token).getBody().getSubject());
+        } catch (ExpiredJwtException exception) {
+            throw new AccessTokenExpiredException();
+        }
     }
 
     public UUID extractJtiFromRefreshToken(String token) {

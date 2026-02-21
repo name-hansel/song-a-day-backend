@@ -1,6 +1,8 @@
 package com.hanselname.songaday.auth.service;
 
 import com.hanselname.songaday.auth.entity.RefreshTokenEntity;
+import com.hanselname.songaday.auth.exception.InvalidRefreshTokenException;
+import com.hanselname.songaday.auth.exception.RefreshTokenExpiredException;
 import com.hanselname.songaday.auth.repository.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
 
@@ -35,17 +37,14 @@ public class RefreshTokenService {
     }
 
     public UUID validateRefreshToken(String token) {
-        // TODO: Else, throw invalidtokenexception
-        RefreshTokenEntity responseTokenEntity = repository.findById(jwtService.extractJtiFromRefreshToken(token)).orElseThrow(IllegalStateException::new);
+        RefreshTokenEntity responseTokenEntity = repository.findById(jwtService.extractJtiFromRefreshToken(token)).orElseThrow(InvalidRefreshTokenException::new);
 
         if (responseTokenEntity.getExpiresAt().isBefore(Instant.now())) {
-            // TODO: Should logout the user
-            throw new IllegalStateException("Refresh token expired");
+            throw new RefreshTokenExpiredException();
         }
 
         if (!hashToken(token).equals(responseTokenEntity.getTokenHash())) {
-            // TODO: Should logout the user
-            throw new IllegalStateException("Refresh token invalid");
+            throw new InvalidRefreshTokenException();
         }
 
         return responseTokenEntity.getAppUserUuid();

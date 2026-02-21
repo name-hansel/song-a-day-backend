@@ -1,5 +1,6 @@
 package com.hanselname.songaday.auth.service;
 
+import com.hanselname.songaday.auth.exception.UserNotLoggedInException;
 import com.hanselname.songaday.auth.utils.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +32,11 @@ public class AuthService {
 
     public UUID validateRefreshToken(HttpServletRequest request) {
         String oldRefreshToken = cookieUtils.extractRefreshToken(request);
+
+        if (oldRefreshToken == null) {
+            throw new UserNotLoggedInException();
+        }
+
         UUID appUserUuid = refreshTokenService.validateRefreshToken(oldRefreshToken);
         refreshTokenService.deleteRefreshToken(oldRefreshToken);
 

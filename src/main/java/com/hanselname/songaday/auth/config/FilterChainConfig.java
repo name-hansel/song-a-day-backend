@@ -1,7 +1,6 @@
 package com.hanselname.songaday.auth.config;
 
 import com.hanselname.songaday.auth.filter.JWTFilter;
-import com.hanselname.songaday.auth.utils.CookieUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,19 +16,18 @@ public class FilterChainConfig {
 
     private final OAuthSuccessHandler successHandler;
     private final JWTFilter jwtFilter;
-    private final CookieUtils cookieUtils;
 
-    public FilterChainConfig(OAuthSuccessHandler successHandler, JWTFilter jwtFilter, CookieUtils cookieUtils) {
+    public FilterChainConfig(OAuthSuccessHandler successHandler, JWTFilter jwtFilter) {
         this.successHandler = successHandler;
         this.jwtFilter = jwtFilter;
-        this.cookieUtils = cookieUtils;
     }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity httpSecurity) {
         httpSecurity.csrf(AbstractHttpConfigurer::disable).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(Customizer.withDefaults()).exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        })).authorizeHttpRequests(auth -> auth.requestMatchers("/oauth2/**", "/error").permitAll().anyRequest().authenticated()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        })).authorizeHttpRequests(auth -> auth.requestMatchers("/oauth2/**", "/error", "/api/auth/refresh-access-token", "/api/auth/logout").permitAll().anyRequest().authenticated()).oauth2Login(oauth -> oauth.successHandler(successHandler)).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return httpSecurity.build();
     }
 }

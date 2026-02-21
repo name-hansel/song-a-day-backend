@@ -3,11 +3,13 @@ package com.hanselname.songaday.song.service;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
+import com.hanselname.songaday.song.exception.SongNotFoundException;
 import com.hanselname.songaday.song.mapper.SongMapper;
 import com.hanselname.songaday.song.repository.SongRepository;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.service.SpotifyService;
 import com.hanselname.songaday.user.entity.AppUserEntity;
+import com.hanselname.songaday.user.exception.UserNotFoundException;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +73,7 @@ public class SongService {
     @Transactional
     public SongResponseDTO updateSongOfDay(UUID appUserUuid, SongRequestDTO request) {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), getLocalDateForUser(appUserEntity)).orElseThrow(() -> new RuntimeException("Song not logged"));
+        SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(), getLocalDateForUser(appUserEntity)).orElseThrow(SongNotFoundException::new);
         songEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity, songEntity);
@@ -92,6 +94,6 @@ public class SongService {
     }
 
     private AppUserEntity getAppUserEntityByUuid(UUID appUserUuid) {
-        return appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
+        return appUserRepository.findById(appUserUuid).orElseThrow(UserNotFoundException::new);
     }
 }

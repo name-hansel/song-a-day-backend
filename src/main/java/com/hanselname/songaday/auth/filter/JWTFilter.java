@@ -1,5 +1,6 @@
 package com.hanselname.songaday.auth.filter;
 
+import com.hanselname.songaday.auth.exception.AccessTokenExpiredException;
 import com.hanselname.songaday.auth.service.JWTService;
 import com.hanselname.songaday.auth.utils.CookieUtils;
 import com.hanselname.songaday.user.entity.AppUserEntity;
@@ -8,6 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -33,12 +35,16 @@ public class JWTFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String accessToken = cookieUtils.extractAccessToken(request);
         if (accessToken != null) {
-            UUID appUserUuid = jwtService.validateAccessToken(accessToken);
-            AppUserEntity appUserEntity = userRepository.findById(appUserUuid).orElse(null);
+            try {
+                UUID appUserUuid = jwtService.validateAccessToken(accessToken);
+                AppUserEntity appUserEntity = userRepository.findById(appUserUuid).orElse(null);
 
-            if (appUserEntity != null) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(appUserEntity, null, List.of());
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (appUserEntity != null) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(appUserEntity, null, List.of());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (AccessTokenExpiredException exception) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
             }
         }
 
