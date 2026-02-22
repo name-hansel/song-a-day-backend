@@ -1,5 +1,10 @@
 package com.hanselname.songaday.common;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Optional;
+
 public class CommonUtils {
     public static final String API_PREFIX = "/api";
     public static final String USER_API_PREFIX = API_PREFIX + "/app-user";
@@ -8,4 +13,16 @@ public class CommonUtils {
     public static final String SPOTIFY_BASE_URL = "https://api.spotify.com/v1";
     public static final String SPOTIFY_ACCOUNTS_TOKEN_URL = "https://accounts.spotify.com/api/token";
     public static final String DEFAULT_TIME_ZONE_ID = "Etc/Greenwich";
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(
+            "EEEE, dd MMMM yyyy", Locale.ENGLISH);
+
+    public static String formatDateForAppUser(LocalDate appUserToday) {
+        return Optional.ofNullable(appUserToday)
+                       .map(date -> date.format(FORMATTER)).orElse(null);
+    }
+
+    private CommonUtils() {
+        // No instantiation
+    }
 }
