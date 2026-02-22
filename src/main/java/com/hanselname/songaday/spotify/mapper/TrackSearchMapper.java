@@ -19,7 +19,8 @@ public interface TrackSearchMapper {
     TrackSearchDTO toDTO(TrackSearch track);
 
     default String getArtistName(TrackSearch track) {
-        return track.getArtists().stream().map(ArtistSearch::getName).collect(Collectors.joining(", "));
+        return track.getArtists().stream().map(ArtistSearch::getName)
+                    .collect(Collectors.joining(", "));
     }
 
     default String getImageForSearch(TrackSearch track) {
@@ -28,6 +29,6 @@ public interface TrackSearchMapper {
             return null;
         }
 
-        return album.getImages().getLast().getUrl();
+        return album.getImages().getFirst().getUrl();
     }
 }
