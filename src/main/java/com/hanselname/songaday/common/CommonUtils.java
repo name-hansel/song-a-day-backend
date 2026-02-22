@@ -1,9 +1,13 @@
 package com.hanselname.songaday.common;
 
+import org.mapstruct.Context;
+import org.mapstruct.Named;
+
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Optional;
 
 public class CommonUtils {
     public static final String API_PREFIX = "/api";
@@ -14,12 +18,19 @@ public class CommonUtils {
     public static final String SPOTIFY_ACCOUNTS_TOKEN_URL = "https://accounts.spotify.com/api/token";
     public static final String DEFAULT_TIME_ZONE_ID = "Etc/Greenwich";
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(
+    private static final DateTimeFormatter CURRENT_DATE_FORMATTER = DateTimeFormatter.ofPattern(
             "EEEE, dd MMMM yyyy", Locale.ENGLISH);
+    private static final DateTimeFormatter SONG_ADDED_TIME_FORMATTER = DateTimeFormatter.ofPattern(
+            "hh:mm a", Locale.ENGLISH);
+
 
     public static String formatDateForAppUser(LocalDate appUserToday) {
-        return Optional.ofNullable(appUserToday)
-                       .map(date -> date.format(FORMATTER)).orElse(null);
+        return appUserToday.format(CURRENT_DATE_FORMATTER);
+    }
+
+    @Named("getFormattedTimeForSong")
+    public static String getFormattedTimeForSong(Instant creationInstant, @Context ZoneId zoneId) {
+        return creationInstant.atZone(zoneId).format(SONG_ADDED_TIME_FORMATTER);
     }
 
     private CommonUtils() {

@@ -16,4 +16,20 @@ public abstract class AbstractEntity {
 
     @LastModifiedDate
     protected Instant updatingDate;
+
+    public Instant getCreatingDate() {
+        return creatingDate;
+    }
+
+    public void setCreatingDate(Instant creatingDate) {
+        this.creatingDate = creatingDate;
+    }
+
+    public Instant getUpdatingDate() {
+        return updatingDate;
+    }
+
+    public void setUpdatingDate(Instant updatingDate) {
+        this.updatingDate = updatingDate;
+    }
 }

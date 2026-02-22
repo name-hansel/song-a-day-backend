@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import static com.hanselname.songaday.user.AppUserUtils.getLocalDateForAppUser;
@@ -98,7 +99,8 @@ public class SongService {
             throw new RuntimeException("Song not found on Spotify.");
         }
 
-        return songMapper.toDTO(songEntity, track);
+        return songMapper.toDTO(songEntity, track,
+                ZoneId.of(appUserEntity.getTimezone()));
     }
 
     private AppUserEntity getAppUserEntityByUuid(UUID appUserUuid) {

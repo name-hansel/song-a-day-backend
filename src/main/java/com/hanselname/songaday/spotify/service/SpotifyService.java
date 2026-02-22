@@ -10,7 +10,6 @@ import com.hanselname.songaday.spotify.response_model.search.TrackSearch;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.annotation.Nonnull;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,21 +31,45 @@ public class SpotifyService {
         this.trackSearchMapper = trackSearchMapper;
         this.spotifyTokenService = spotifyTokenService;
         this.appUserRepository = appUserRepository;
-        this.webClient = WebClient.builder().baseUrl(CommonUtils.SPOTIFY_BASE_URL).build();
+        this.webClient = WebClient.builder()
+                                  .baseUrl(CommonUtils.SPOTIFY_BASE_URL)
+                                  .build();
     }
 
     public List<TrackSearchDTO> searchForTrack(UUID appUserUuid, @Nonnull String searchQuery) {
-        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid).orElseThrow(() -> new RuntimeException("User not found."));
+        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
+                                                       .orElseThrow(
+                                                               () -> new RuntimeException(
+                                                                       "User not found."));
 
-        SpotifySearch searchResponse = webClient.get().uri(uriBuilder -> uriBuilder.path("/search").queryParam("q", searchQuery).queryParam("type", "track").queryParam("limit", "5").build()).headers(headers -> headers.setBearerAuth(spotifyTokenService.getValidAccessToken(appUserEntity))).retrieve().bodyToMono(SpotifySearch.class).block();
+        SpotifySearch searchResponse = webClient.get()
+                                                .uri(uriBuilder -> uriBuilder
+                                                        .path("/search")
+                                                        .queryParam("q",
+                                                                searchQuery)
+                                                        .queryParam("type",
+                                                                "track")
+                                                        .queryParam("limit",
+                                                                "5").build())
+                                                .headers(
+                                                        headers -> headers.setBearerAuth(
+                                                                spotifyTokenService.getValidAccessToken(
+                                                                        appUserEntity)))
+                                                .retrieve()
+                                                .bodyToMono(SpotifySearch.class)
+                                                .block();
 
-        return extractTracks(searchResponse).stream().map(trackSearchMapper::toDTO).collect(Collectors.toList());
+        return extractTracks(searchResponse).stream()
+                                            .map(trackSearchMapper::toDTO)
+                                            .collect(Collectors.toList());
     }
 
-    @Cacheable(value = "spotify:track", key = "#spotifyId")
+    // TODO: Uncomment when testing with Redis
+    //    @Cacheable(value = "spotify:track", key = "#spotifyId")
     public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId) {
         try {
-            return trackSearchMapper.toDTO(getTrackFromSpotify(appUserEntity, spotifyId));
+            return trackSearchMapper.toDTO(
+                    getTrackFromSpotify(appUserEntity, spotifyId));
         } catch (WebClientResponseException.BadRequest exception) {
             throw new TrackNotFoundException();
         }
@@ -61,6 +84,12 @@ public class SpotifyService {
     }
 
     private TrackSearch getTrackFromSpotify(AppUserEntity appUserEntity, String spotifyId) {
-        return webClient.get().uri(uriBuilder -> uriBuilder.path("/tracks/").path(spotifyId).build()).header(HttpHeaders.AUTHORIZATION, "Bearer " + spotifyTokenService.getValidAccessToken(appUserEntity)).retrieve().bodyToMono(TrackSearch.class).block();
+        return webClient.get().uri(uriBuilder -> uriBuilder.path("/tracks/")
+                                                           .path(spotifyId)
+                                                           .build())
+                        .header(HttpHeaders.AUTHORIZATION,
+                                "Bearer " + spotifyTokenService.getValidAccessToken(
+                                        appUserEntity)).retrieve()
+                        .bodyToMono(TrackSearch.class).block();
     }
 }
