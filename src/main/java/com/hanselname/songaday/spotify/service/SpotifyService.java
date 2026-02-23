@@ -10,6 +10,7 @@ import com.hanselname.songaday.spotify.response_model.search.TrackSearch;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.annotation.Nonnull;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -60,16 +61,16 @@ public class SpotifyService {
                                                 .block();
 
         return extractTracks(searchResponse).stream()
-                                            .map(trackSearchMapper::toDTO)
+                                            .map(track -> trackSearchMapper.toDTO(
+                                                    track, false))
                                             .collect(Collectors.toList());
     }
 
-    // TODO: Uncomment when testing with Redis
-    //    @Cacheable(value = "spotify:track", key = "#spotifyId")
+    @Cacheable(value = "spotify:track", key = "#spotifyId")
     public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId) {
         try {
             return trackSearchMapper.toDTO(
-                    getTrackFromSpotify(appUserEntity, spotifyId));
+                    getTrackFromSpotify(appUserEntity, spotifyId), true);
         } catch (WebClientResponseException.BadRequest exception) {
             throw new TrackNotFoundException();
         }
