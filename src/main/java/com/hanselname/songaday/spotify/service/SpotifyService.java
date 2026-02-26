@@ -8,6 +8,7 @@ import com.hanselname.songaday.spotify.mapper.TrackSearchMapper;
 import com.hanselname.songaday.spotify.response_model.search.SpotifySearch;
 import com.hanselname.songaday.spotify.response_model.search.TrackSearch;
 import com.hanselname.songaday.user.entity.AppUserEntity;
+import com.hanselname.songaday.user.exception.UserNotFoundException;
 import com.hanselname.songaday.user.repository.AppUserRepository;
 import jakarta.annotation.Nonnull;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,8 +41,7 @@ public class SpotifyService {
     public List<TrackSearchDTO> searchForTrack(UUID appUserUuid, @Nonnull String searchQuery) {
         AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
                                                        .orElseThrow(
-                                                               () -> new RuntimeException(
-                                                                       "User not found."));
+                                                               UserNotFoundException::new);
 
         SpotifySearch searchResponse = webClient.get()
                                                 .uri(uriBuilder -> uriBuilder
@@ -85,12 +85,13 @@ public class SpotifyService {
     }
 
     private TrackSearch getTrackFromSpotify(AppUserEntity appUserEntity, String spotifyId) {
+        String validAccessToken = "Bearer " + spotifyTokenService.getValidAccessToken(
+                appUserEntity);
+
         return webClient.get().uri(uriBuilder -> uriBuilder.path("/tracks/")
                                                            .path(spotifyId)
                                                            .build())
-                        .header(HttpHeaders.AUTHORIZATION,
-                                "Bearer " + spotifyTokenService.getValidAccessToken(
-                                        appUserEntity)).retrieve()
-                        .bodyToMono(TrackSearch.class).block();
+                        .header(HttpHeaders.AUTHORIZATION, validAccessToken)
+                        .retrieve().bodyToMono(TrackSearch.class).block();
     }
 }

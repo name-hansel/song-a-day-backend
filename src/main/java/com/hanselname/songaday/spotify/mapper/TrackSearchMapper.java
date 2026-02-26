@@ -19,6 +19,7 @@ public interface TrackSearchMapper {
     @Mapping(source = "album.name", target = "albumName")
     @Mapping(target = "artistName", expression = "java(getArtistName(track))")
     @Mapping(target = "imageUrl", expression = "java(getImageForSearch(track, needLargeImage))")
+    @Mapping(target = "spotifyUrl", expression = "java(getSpotifyUrl(track))")
     TrackSearchDTO toDTO(TrackSearch track, @Context boolean needLargeImage);
 
     default String getArtistName(TrackSearch track) {
@@ -36,5 +37,9 @@ public interface TrackSearchMapper {
 
         return needLargeImage ? images.getFirst().getUrl() : images.getLast()
                                                                    .getUrl();
+    }
+
+    default String getSpotifyUrl(TrackSearch track) {
+        return track.getExternalUrls().getSpotify();
     }
 }
