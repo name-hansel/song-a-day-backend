@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.hanselname.songaday.user.AppUserUtils.getLocalDateForAppUser;
 
@@ -93,8 +94,15 @@ public class SongService {
     }
 
     public List<SongResponseDTO> getSongHistoryForLastWeek(UUID appUserUuid) {
-        // TODO: implement
-        return List.of();
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+        LocalDate today = getLocalDateForAppUser(appUserEntity);
+        LocalDate startDate = today.minusDays(6);
+
+        return songRepository
+                .findByAppUserUuidAndSongDateBetweenOrderBySongDateDesc(
+                        appUserUuid, startDate, today).stream()
+                .map(songEntity -> getSongResponseDTO(appUserEntity,
+                        songEntity)).collect(Collectors.toList());
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {

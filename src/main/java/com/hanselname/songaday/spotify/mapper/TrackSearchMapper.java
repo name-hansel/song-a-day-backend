@@ -22,6 +22,8 @@ public interface TrackSearchMapper {
     @Mapping(target = "spotifyUrl", expression = "java(getSpotifyUrl(track))")
     TrackSearchDTO toDTO(TrackSearch track, @Context boolean needLargeImage);
 
+    List<TrackSearchDTO> toDTOList(List<TrackSearch> tracks, @Context boolean needLargeImage);
+
     default String getArtistName(TrackSearch track) {
         return track.getArtists().stream().map(ArtistSearch::getName)
                     .collect(Collectors.joining(", "));

@@ -19,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class SpotifyService {
@@ -60,10 +59,8 @@ public class SpotifyService {
                                                 .bodyToMono(SpotifySearch.class)
                                                 .block();
 
-        return extractTracks(searchResponse).stream()
-                                            .map(track -> trackSearchMapper.toDTO(
-                                                    track, false))
-                                            .collect(Collectors.toList());
+        return trackSearchMapper.toDTOList(extractTracks(searchResponse),
+                false);
     }
 
     @Cacheable(value = "spotify:track", key = "#spotifyId")
