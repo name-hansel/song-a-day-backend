@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 
 import static com.hanselname.songaday.user.AppUserUtils.getLocalDateForAppUser;
@@ -89,6 +90,11 @@ public class SongService {
         songEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity, songEntity);
+    }
+
+    public List<SongResponseDTO> getSongHistoryForLastWeek(UUID appUserUuid) {
+        // TODO: implement
+        return List.of();
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {

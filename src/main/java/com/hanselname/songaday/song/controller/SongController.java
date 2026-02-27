@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,5 +40,10 @@ public class SongController {
     public ResponseEntity<Void> deleteSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
         songService.deleteSongOfDay(appUserUuid);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/history")
+    public List<SongResponseDTO> getSongHistoryForLastWeek(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
+        return songService.getSongHistoryForLastWeek(appUserUuid);
     }
 }
