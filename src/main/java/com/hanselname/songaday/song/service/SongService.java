@@ -16,8 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.hanselname.songaday.user.AppUserUtils.getLocalDateForAppUser;
@@ -51,7 +54,7 @@ public class SongService {
         return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
                                      LocalDate.of(year, month, day))
                              .map(song -> getSongResponseDTO(appUserEntity,
-                                     song)).orElse(null);
+                                     song, true)).orElse(null);
     }
 
     public SongResponseDTO logSongOfDay(UUID appUserUuid, SongRequestDTO request) {
@@ -71,7 +74,7 @@ public class SongService {
         songEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity,
-                songRepository.save(songEntity));
+                songRepository.save(songEntity), true);
     }
 
     @Transactional
@@ -90,7 +93,7 @@ public class SongService {
                 .orElseThrow(SongNotFoundException::new);
         songEntity.setSpotifyId(request.spotifyId());
 
-        return getSongResponseDTO(appUserEntity, songEntity);
+        return getSongResponseDTO(appUserEntity, songEntity, true);
     }
 
     public List<SongResponseDTO> getSongHistoryForLastWeek(UUID appUserUuid) {
@@ -98,16 +101,27 @@ public class SongService {
         LocalDate today = getLocalDateForAppUser(appUserEntity);
         LocalDate startDate = today.minusDays(6);
 
-        return songRepository
+        Map<LocalDate, SongEntity> songEntityMap = songRepository
                 .findByAppUserUuidAndSongDateBetweenOrderBySongDateDesc(
-                        appUserUuid, startDate, today).stream()
-                .map(songEntity -> getSongResponseDTO(appUserEntity,
-                        songEntity)).collect(Collectors.toList());
+                        appUserUuid, startDate, today).stream().collect(
+                        Collectors.toMap(SongEntity::getSongDate,
+                                Function.identity()));
+
+        List<SongResponseDTO> result = new ArrayList<>();
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            SongEntity songEntity = songEntityMap.get(date);
+            result.add(songEntity != null ? getSongResponseDTO(appUserEntity,
+                    songEntity, false) : null);
+        }
+
+        return result;
     }
 
-    private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
+    private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity, boolean needLargeImage) {
         TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity,
-                songEntity.getSpotifyId());
+                songEntity.getSpotifyId(), needLargeImage);
 
         if (track == null) {
             throw new RuntimeException("Song not found on Spotify.");

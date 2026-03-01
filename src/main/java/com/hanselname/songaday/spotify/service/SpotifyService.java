@@ -64,10 +64,11 @@ public class SpotifyService {
     }
 
     @Cacheable(value = "spotify:track", key = "#spotifyId")
-    public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId) {
+    public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId, boolean needLargeImage) {
         try {
             return trackSearchMapper.toDTO(
-                    getTrackFromSpotify(appUserEntity, spotifyId), true);
+                    getTrackFromSpotify(appUserEntity, spotifyId),
+                    needLargeImage);
         } catch (WebClientResponseException.BadRequest exception) {
             throw new TrackNotFoundException();
         }
