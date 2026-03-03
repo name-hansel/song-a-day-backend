@@ -37,7 +37,7 @@ public class SpotifyService {
                                   .build();
     }
 
-    public List<TrackSearchDTO> searchForTrack(UUID appUserUuid, @Nonnull String searchQuery) {
+    public List<TrackSearchDTO> searchForTracks(UUID appUserUuid, @Nonnull String searchQuery) {
         AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
                                                        .orElseThrow(
                                                                UserNotFoundException::new);
@@ -72,6 +72,13 @@ public class SpotifyService {
         } catch (WebClientResponseException.BadRequest exception) {
             throw new TrackNotFoundException();
         }
+    }
+
+    public TrackSearchDTO getTrackBySpotifyId(@Nonnull UUID appUserUuid, @Nonnull String spotifyId) {
+        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
+                                                       .orElseThrow(
+                                                               UserNotFoundException::new);
+        return getTrackBySpotifyId(appUserEntity, spotifyId, true);
     }
 
     private List<TrackSearch> extractTracks(SpotifySearch searchResult) {

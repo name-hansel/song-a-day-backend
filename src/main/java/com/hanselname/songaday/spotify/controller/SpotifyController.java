@@ -3,10 +3,7 @@ package com.hanselname.songaday.spotify.controller;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.service.SpotifyService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,7 +18,12 @@ public class SpotifyController {
     }
 
     @GetMapping("/search-track")
-    public List<TrackSearchDTO> searchForTrack(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(name = "q") String searchQuery) {
-        return spotifyService.searchForTrack(appUserUuid, searchQuery);
+    public List<TrackSearchDTO> searchForTracks(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(name = "q") String searchQuery) {
+        return spotifyService.searchForTracks(appUserUuid, searchQuery);
+    }
+
+    @GetMapping("/search-track/{spotifyId}")
+    public TrackSearchDTO searchForTrack(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable String spotifyId) {
+        return spotifyService.getTrackBySpotifyId(appUserUuid, spotifyId);
     }
 }
