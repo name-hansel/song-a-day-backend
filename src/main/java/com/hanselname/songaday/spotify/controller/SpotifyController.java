@@ -17,7 +17,7 @@ public class SpotifyController {
         this.spotifyService = spotifyService;
     }
 
-    @GetMapping("/search-track")
+    @GetMapping("/search-tracks")
     public List<TrackSearchDTO> searchForTracks(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(name = "q") String searchQuery) {
         return spotifyService.searchForTracks(appUserUuid, searchQuery);
     }
