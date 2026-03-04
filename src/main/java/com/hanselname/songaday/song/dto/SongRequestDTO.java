@@ -1,4 +1,4 @@
 package com.hanselname.songaday.song.dto;
 
-public record SongRequestDTO(String spotifyId) {
+public record SongRequestDTO(String spotifyId, String memory) {
 }

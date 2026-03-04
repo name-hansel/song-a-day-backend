@@ -25,6 +25,9 @@ public class SongEntity extends AbstractEntity {
     @Column(nullable = false)
     private LocalDate songDate;
 
+    @Column(length = 160)
+    private String memory;
+
     public UUID getUuid() {
         return uuid;
     }
@@ -55,5 +58,13 @@ public class SongEntity extends AbstractEntity {
 
     public void setSongDate(LocalDate songDate) {
         this.songDate = songDate;
+    }
+
+    public String getMemory() {
+        return memory;
+    }
+
+    public void setMemory(String memory) {
+        this.memory = memory;
     }
 }

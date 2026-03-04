@@ -3,7 +3,6 @@ package com.hanselname.songaday.song.service;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
-import com.hanselname.songaday.song.exception.SongNotFoundException;
 import com.hanselname.songaday.song.mapper.SongMapper;
 import com.hanselname.songaday.song.repository.SongRepository;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
@@ -72,6 +71,7 @@ public class SongService {
                 });
 
         songEntity.setSpotifyId(request.spotifyId());
+        songEntity.setMemory(request.memory());
 
         return getSongResponseDTO(appUserEntity,
                 songRepository.save(songEntity), true);
@@ -82,18 +82,6 @@ public class SongService {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         songRepository.deleteByAppUserUuidAndSongDate(appUserEntity.getUuid(),
                 getLocalDateForAppUser(appUserEntity));
-    }
-
-    @Transactional
-    public SongResponseDTO updateSongOfDay(UUID appUserUuid, SongRequestDTO request) {
-        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        SongEntity songEntity = songRepository
-                .findByAppUserUuidAndSongDate(appUserEntity.getUuid(),
-                        getLocalDateForAppUser(appUserEntity))
-                .orElseThrow(SongNotFoundException::new);
-        songEntity.setSpotifyId(request.spotifyId());
-
-        return getSongResponseDTO(appUserEntity, songEntity, true);
     }
 
     public List<SongResponseDTO> getSongHistoryForLastWeek(UUID appUserUuid) {

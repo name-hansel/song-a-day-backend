@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public record SongResponseDTO(UUID uuid, LocalDate songDate,
                               TrackSearchDTO trackInformation,
-                              String addedAtTime) {
+                              String addedAtTime, String memory) {
 }
