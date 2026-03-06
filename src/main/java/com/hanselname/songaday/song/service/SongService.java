@@ -70,6 +70,7 @@ public class SongService {
                     return newSongEntity;
                 });
 
+        // TODO: Trim or validate 160 characters for memory
         songEntity.setSpotifyId(request.spotifyId());
         songEntity.setMemory(request.memory());
 
