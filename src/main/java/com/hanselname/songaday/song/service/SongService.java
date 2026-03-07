@@ -48,12 +48,21 @@ public class SongService {
     public SongResponseDTO getSongOfDay(UUID appUserUuid) {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
         LocalDate today = getLocalDateForAppUser(appUserEntity);
-        return getSongOfDay(appUserEntity.getUuid(), today.getDayOfMonth(),
-                today.getMonthValue(), today.getYear());
+        return getSongOfDay(appUserEntity.getUuid(), today.toString());
     }
 
-    public SongResponseDTO getSongOfDay(UUID appUserUuid, int day, int month, int year) {
+    public SongResponseDTO getSongOfDay(UUID appUserUuid, String date) {
         try {
+            String[] dateComponents = date.split("-");
+
+            if (dateComponents.length != 3) {
+                throw new InvalidDateException();
+            }
+
+            int year = Integer.parseInt(dateComponents[0]);
+            int month = Integer.parseInt(dateComponents[1]);
+            int day = Integer.parseInt(dateComponents[2]);
+
             AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
             return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
                                          LocalDate.of(year, month, day))

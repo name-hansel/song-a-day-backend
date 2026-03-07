@@ -22,9 +22,9 @@ public class SongController {
         this.songService = songService;
     }
 
-    @GetMapping("/{year}-{month}-{day}")
-    public SongResponseDTO getSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable(name = "day") int dayOfMonth, @PathVariable int month, @PathVariable int year) {
-        return songService.getSongOfDay(appUserUuid, dayOfMonth, month, year);
+    @GetMapping("/{date}")
+    public SongResponseDTO getSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable String date) {
+        return songService.getSongOfDay(appUserUuid, date);
     }
 
     @GetMapping
