@@ -3,6 +3,7 @@ package com.hanselname.songaday.song.controller;
 import com.hanselname.songaday.common.CommonUtils;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
+import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
 import com.hanselname.songaday.song.service.SongService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,5 +46,10 @@ public class SongController {
     @GetMapping("/history")
     public List<SongResponseDTO> getSongHistoryForLastWeek(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
         return songService.getSongHistoryForLastWeek(appUserUuid);
+    }
+
+    @PatchMapping("/memory/{songUuid}")
+    public SongResponseDTO updateMemoryForSong(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable UUID songUuid, @RequestBody UpdateMemoryRequestDTO request) {
+        return songService.updateMemoryForSong(appUserUuid, songUuid, request);
     }
 }

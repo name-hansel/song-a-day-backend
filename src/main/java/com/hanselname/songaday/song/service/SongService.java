@@ -2,7 +2,9 @@ package com.hanselname.songaday.song.service;
 
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
+import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
+import com.hanselname.songaday.song.exception.SongNotFoundException;
 import com.hanselname.songaday.song.mapper.SongMapper;
 import com.hanselname.songaday.song.repository.SongRepository;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
@@ -106,6 +108,18 @@ public class SongService {
         }
 
         return result;
+    }
+
+    public SongResponseDTO updateMemoryForSong(UUID appUserUuid, UUID songUuid, UpdateMemoryRequestDTO request) {
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+        SongEntity songEntity = songRepository.findById(songUuid).orElseThrow(
+                SongNotFoundException::new);
+
+        // TODO: Validate new memory no. of characters
+        songEntity.setMemory(request.updatedMemory());
+
+        return getSongResponseDTO(appUserEntity,
+                songRepository.save(songEntity), true);
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity, boolean needLargeImage) {
