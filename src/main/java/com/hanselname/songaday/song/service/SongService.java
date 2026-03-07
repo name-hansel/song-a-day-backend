@@ -4,6 +4,7 @@ import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
+import com.hanselname.songaday.song.exception.InvalidDateException;
 import com.hanselname.songaday.song.exception.SongNotFoundException;
 import com.hanselname.songaday.song.mapper.SongMapper;
 import com.hanselname.songaday.song.repository.SongRepository;
@@ -15,6 +16,7 @@ import com.hanselname.songaday.user.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -51,11 +53,15 @@ public class SongService {
     }
 
     public SongResponseDTO getSongOfDay(UUID appUserUuid, int day, int month, int year) {
-        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
-                                     LocalDate.of(year, month, day))
-                             .map(song -> getSongResponseDTO(appUserEntity,
-                                     song, true)).orElse(null);
+        try {
+            AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+            return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
+                                         LocalDate.of(year, month, day))
+                                 .map(song -> getSongResponseDTO(appUserEntity,
+                                         song, true)).orElse(null);
+        } catch (DateTimeException exc) {
+            throw new InvalidDateException();
+        }
     }
 
     public SongResponseDTO logSongOfDay(UUID appUserUuid, SongRequestDTO request) {
