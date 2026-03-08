@@ -1,6 +1,6 @@
 package com.hanselname.songaday.user.controller;
 
-import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.common.utils.CommonUtils;
 import com.hanselname.songaday.user.dto.AppUserTimezoneRequestDTO;
 import com.hanselname.songaday.user.dto.AppUserTimezoneResponseDTO;
 import com.hanselname.songaday.user.dto.AuthAppUserResponseDTO;
@@ -27,6 +27,7 @@ public class AppUserController {
 
     @PatchMapping("/time-zone")
     public AppUserTimezoneResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody AppUserTimezoneRequestDTO request) {
-        return appUserService.updateUserTimezone(appUserUuid, request.timezone());
+        return appUserService.updateUserTimezone(appUserUuid,
+                request.timezone());
     }
 }

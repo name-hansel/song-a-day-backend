@@ -1,6 +1,6 @@
 package com.hanselname.songaday.auth.utils;
 
-import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.common.utils.CommonUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +23,13 @@ public class CookieUtils {
     private static final String REFRESH_TOKEN_PATH = CommonUtils.AUTH_API_PREFIX;
 
     public ResponseCookie createAccessTokenCookie(String token) {
-        return build(ACCESS_TOKEN_NAME, token, accessTokenExpirationSeconds, ACCESS_TOKEN_PATH, "Lax");
+        return build(ACCESS_TOKEN_NAME, token, accessTokenExpirationSeconds,
+                ACCESS_TOKEN_PATH, "Lax");
     }
 
     public ResponseCookie createRefreshTokenCookie(String token) {
-        return build(REFRESH_TOKEN_NAME, token, refreshTokenExpirationSeconds, REFRESH_TOKEN_PATH, "Strict");
+        return build(REFRESH_TOKEN_NAME, token, refreshTokenExpirationSeconds,
+                REFRESH_TOKEN_PATH, "Strict");
     }
 
     public String extractAccessToken(HttpServletRequest request) {
@@ -59,10 +61,13 @@ public class CookieUtils {
             return null;
         }
 
-        return Arrays.stream(request.getCookies()).filter(cookie -> cookie.getName().equals(name)).map(Cookie::getValue).findFirst().orElse(null);
+        return Arrays.stream(request.getCookies())
+                     .filter(cookie -> cookie.getName().equals(name))
+                     .map(Cookie::getValue).findFirst().orElse(null);
     }
 
     private ResponseCookie delete(String name, String path) {
-        return ResponseCookie.from(name, "").httpOnly(true).secure(true).path(path).maxAge(0).build();
+        return ResponseCookie.from(name, "").httpOnly(true).secure(true)
+                             .path(path).maxAge(0).build();
     }
 }

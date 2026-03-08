@@ -1,7 +1,7 @@
 package com.hanselname.songaday.spotify.service;
 
 import com.hanselname.songaday.auth.service.SpotifyTokenService;
-import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.common.utils.CommonUtils;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.exception.TrackNotFoundException;
 import com.hanselname.songaday.spotify.mapper.TrackSearchMapper;

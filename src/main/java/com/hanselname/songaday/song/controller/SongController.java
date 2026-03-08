@@ -1,6 +1,6 @@
 package com.hanselname.songaday.song.controller;
 
-import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.common.utils.CommonUtils;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;

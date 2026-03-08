@@ -1,4 +1,4 @@
-package com.hanselname.songaday.common;
+package com.hanselname.songaday.common.utils;
 
 import org.mapstruct.Context;
 import org.mapstruct.Named;

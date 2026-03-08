@@ -1,6 +1,6 @@
 package com.hanselname.songaday.song.mapper;
 
-import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.common.utils.CommonUtils;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;

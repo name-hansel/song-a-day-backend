@@ -1,5 +1,7 @@
 package com.hanselname.songaday.song.service;
 
+import com.hanselname.songaday.common.exception.exception.InvalidDataException;
+import com.hanselname.songaday.common.utils.StringUtils;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
@@ -87,9 +89,13 @@ public class SongService {
                     return newSongEntity;
                 });
 
-        // TODO: Trim or validate 160 characters for memory
-        songEntity.setSpotifyId(request.spotifyId());
+        String trimmedMemory = StringUtils.trim(request.memory());
+        if (trimmedMemory != null && trimmedMemory.length() > 160) {
+            throw new InvalidDataException("MEMORY");
+        }
+
         songEntity.setMemory(request.memory());
+        songEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity,
                 songRepository.save(songEntity), true);
@@ -130,7 +136,10 @@ public class SongService {
         SongEntity songEntity = songRepository.findById(songUuid).orElseThrow(
                 SongNotFoundException::new);
 
-        // TODO: Validate new memory no. of characters
+        String trimmedMemory = StringUtils.trim(request.updatedMemory());
+        if (trimmedMemory != null && trimmedMemory.length() > 160) {
+            throw new InvalidDataException("MEMORY");
+        }
         songEntity.setMemory(request.updatedMemory());
 
         return getSongResponseDTO(appUserEntity,

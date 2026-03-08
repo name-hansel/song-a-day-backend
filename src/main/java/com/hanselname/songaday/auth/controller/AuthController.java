@@ -4,7 +4,7 @@ import com.hanselname.songaday.auth.service.AuthService;
 import com.hanselname.songaday.auth.service.JWTService;
 import com.hanselname.songaday.auth.service.RefreshTokenService;
 import com.hanselname.songaday.auth.utils.CookieUtils;
-import com.hanselname.songaday.common.CommonUtils;
+import com.hanselname.songaday.common.utils.CommonUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
@@ -34,9 +34,14 @@ public class AuthController {
     public ResponseEntity<Void> refreshAccessToken(HttpServletRequest request) {
         UUID appUserUuid = authService.validateRefreshToken(request);
         String newAccessToken = jwtService.generateAccessToken(appUserUuid);
-        String newRefreshToken = refreshTokenService.generateRefreshTokenForAppUser(appUserUuid);
+        String newRefreshToken = refreshTokenService.generateRefreshTokenForAppUser(
+                appUserUuid);
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(newAccessToken).toString()).header(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(newRefreshToken).toString()).build();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,
+                                     cookieUtils.createAccessTokenCookie(newAccessToken).toString())
+                             .header(HttpHeaders.SET_COOKIE, cookieUtils
+                                     .createRefreshTokenCookie(newRefreshToken)
+                                     .toString()).build();
     }
 
     @PostMapping("/logout")
