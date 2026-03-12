@@ -133,8 +133,9 @@ public class SongService {
 
     public SongResponseDTO updateMemoryForSong(UUID appUserUuid, UUID songUuid, UpdateMemoryRequestDTO request) {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        SongEntity songEntity = songRepository.findById(songUuid).orElseThrow(
-                SongNotFoundException::new);
+        SongEntity songEntity = songRepository
+                .findByAppUserUuidAndUuid(appUserUuid, songUuid)
+                .orElseThrow(SongNotFoundException::new);
 
         String trimmedMemory = StringUtils.trim(request.updatedMemory());
         if (trimmedMemory != null && trimmedMemory.length() > 160) {
