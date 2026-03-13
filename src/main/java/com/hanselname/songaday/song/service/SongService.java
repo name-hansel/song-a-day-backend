@@ -69,7 +69,7 @@ public class SongService {
             return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
                                          LocalDate.of(year, month, day))
                                  .map(song -> getSongResponseDTO(appUserEntity,
-                                         song, true)).orElse(null);
+                                         song)).orElse(null);
         } catch (DateTimeException exc) {
             throw new InvalidDateException();
         }
@@ -98,7 +98,7 @@ public class SongService {
         songEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity,
-                songRepository.save(songEntity), true);
+                songRepository.save(songEntity));
     }
 
     @Transactional
@@ -125,7 +125,7 @@ public class SongService {
             LocalDate date = today.minusDays(i);
             SongEntity songEntity = songEntityMap.get(date);
             result.add(songEntity != null ? getSongResponseDTO(appUserEntity,
-                    songEntity, false) : null);
+                    songEntity) : null);
         }
 
         return result;
@@ -144,12 +144,12 @@ public class SongService {
         songEntity.setMemory(request.updatedMemory());
 
         return getSongResponseDTO(appUserEntity,
-                songRepository.save(songEntity), true);
+                songRepository.save(songEntity));
     }
 
-    private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity, boolean needLargeImage) {
+    private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
         TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity,
-                songEntity.getSpotifyId(), needLargeImage);
+                songEntity.getSpotifyId());
 
         if (track == null) {
             throw new RuntimeException("Song not found on Spotify.");

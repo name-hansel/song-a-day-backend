@@ -27,12 +27,12 @@ public class SpotifyService {
 
     public TrackSearchDTO getTrackBySpotifyId(@Nonnull UUID appUserUuid, @Nonnull String spotifyId) {
         return spotifyCachedService.getTrackBySpotifyId(
-                getAppUserEntity(appUserUuid), spotifyId, true);
+                getAppUserEntity(appUserUuid), spotifyId);
     }
 
-    public TrackSearchDTO getTrackBySpotifyId(@Nonnull AppUserEntity appUserEntity, @Nonnull String spotifyId, boolean needLargeImage) {
+    public TrackSearchDTO getTrackBySpotifyId(@Nonnull AppUserEntity appUserEntity, @Nonnull String spotifyId) {
         return spotifyCachedService.getTrackBySpotifyId(appUserEntity,
-                spotifyId, needLargeImage);
+                spotifyId);
     }
 
     private AppUserEntity getAppUserEntity(@Nonnull UUID appUserUuid) {

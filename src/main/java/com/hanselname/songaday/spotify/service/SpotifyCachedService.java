@@ -50,16 +50,14 @@ public class SpotifyCachedService {
                                                 .bodyToMono(SpotifySearch.class)
                                                 .block();
 
-        return trackSearchMapper.toDTOList(extractTracks(searchResponse),
-                false);
+        return trackSearchMapper.toDTOList(extractTracks(searchResponse));
     }
 
     @Cacheable(value = "spotify:track", key = "#spotifyId")
-    public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId, boolean needLargeImage) {
+    public TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, @Nonnull String spotifyId) {
         try {
             return trackSearchMapper.toDTO(
-                    getTrackFromSpotify(appUserEntity, spotifyId),
-                    needLargeImage);
+                    getTrackFromSpotify(appUserEntity, spotifyId));
         } catch (WebClientResponseException.BadRequest exception) {
             throw new TrackNotFoundException();
         }
