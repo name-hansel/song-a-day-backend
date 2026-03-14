@@ -2,12 +2,13 @@ package com.hanselname.songaday.user.controller;
 
 import com.hanselname.songaday.common.utils.CommonUtils;
 import com.hanselname.songaday.user.dto.AppUserTimezoneRequestDTO;
-import com.hanselname.songaday.user.dto.AppUserTimezoneResponseDTO;
 import com.hanselname.songaday.user.dto.AuthAppUserResponseDTO;
+import com.hanselname.songaday.user.dto.TimezoneResponseDTO;
 import com.hanselname.songaday.user.service.AppUserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,8 +26,13 @@ public class AppUserController {
         return appUserService.getAppUser(appUserUuid);
     }
 
-    @PatchMapping("/time-zone")
-    public AppUserTimezoneResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody AppUserTimezoneRequestDTO request) {
+    @GetMapping("/timezones")
+    public List<TimezoneResponseDTO> getAllTimezones() {
+        return appUserService.getAllTimezones();
+    }
+
+    @PatchMapping("/timezone")
+    public TimezoneResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody AppUserTimezoneRequestDTO request) {
         return appUserService.updateUserTimezone(appUserUuid,
                 request.timezone());
     }
