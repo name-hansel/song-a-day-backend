@@ -19,12 +19,16 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
+
+    @Value("${app.frontend-url-new-user}")
+    private String frontendUrlNewUser;
 
     private final AppUserRepository appUserRepository;
     private final JWTService jwtService;
@@ -45,32 +49,49 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oauthUser = oauthToken.getPrincipal();
-        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
+                oauthToken.getAuthorizedClientRegistrationId(),
+                oauthToken.getName());
 
-        String spotifyId = oauthUser.getAttribute(SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
-        AppUserEntity appUserEntity = appUserRepository.findBySpotifyId(spotifyId).orElseGet(() -> {
-            AppUserEntity newUser = new AppUserEntity();
-            newUser.setSpotifyId(spotifyId);
-            newUser.setSpotifyEmail(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
-            newUser.setSpotifyDisplayName(oauthUser.getAttribute(SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME));
+        String spotifyId = oauthUser.getAttribute(
+                SpotifyUtils.SPOTIFY_ID_ATTRIBUTE_NAME);
+        boolean isNewUser = false;
 
-            return newUser;
-        });
+        Optional<AppUserEntity> foundAppUserEntity = appUserRepository.findBySpotifyId(
+                spotifyId);
+        AppUserEntity appUserEntity = foundAppUserEntity.orElse(null);
+        if (appUserEntity == null) {
+            appUserEntity = new AppUserEntity();
+            appUserEntity.setSpotifyId(spotifyId);
+            appUserEntity.setSpotifyEmail(oauthUser.getAttribute(
+                    SpotifyUtils.SPOTIFY_EMAIL_ATTRIBUTE_NAME));
+            appUserEntity.setSpotifyDisplayName(oauthUser.getAttribute(
+                    SpotifyUtils.SPOTIFY_DISPLAY_NAME_ATTRIBUTE_NAME));
+            isNewUser = true;
+        }
 
         // Spotify tokens
-        appUserEntity.setSpotifyAccessToken(client.getAccessToken().getTokenValue());
-        appUserEntity.setSpotifyRefreshToken(client.getRefreshToken().getTokenValue());
-        appUserEntity.setSpotifyTokenExpiresAt(client.getAccessToken().getExpiresAt());
+        appUserEntity.setSpotifyAccessToken(
+                client.getAccessToken().getTokenValue());
+        appUserEntity.setSpotifyRefreshToken(
+                client.getRefreshToken().getTokenValue());
+        appUserEntity.setSpotifyTokenExpiresAt(
+                client.getAccessToken().getExpiresAt());
 
         appUserRepository.save(appUserEntity);
 
         // Tokens for frontend
-        String accessToken = jwtService.generateAccessToken(appUserEntity.getUuid());
-        String refreshToken = refreshTokenService.generateRefreshTokenForAppUser(appUserEntity.getUuid());
+        String accessToken = jwtService.generateAccessToken(
+                appUserEntity.getUuid());
+        String refreshToken = refreshTokenService.generateRefreshTokenForAppUser(
+                appUserEntity.getUuid());
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createAccessTokenCookie(accessToken).toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieUtils.createRefreshTokenCookie(refreshToken).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                cookieUtils.createAccessTokenCookie(accessToken).toString());
+        response.addHeader(HttpHeaders.SET_COOKIE,
+                cookieUtils.createRefreshTokenCookie(refreshToken).toString());
 
-        getRedirectStrategy().sendRedirect(request, response, frontendUrl);
+        getRedirectStrategy().sendRedirect(request, response,
+                isNewUser ? frontendUrlNewUser : frontendUrl);
     }
 }

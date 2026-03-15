@@ -43,3 +43,4 @@ app:
     access-token-expiration-seconds: <>
     refresh-token-expiration-seconds: <>
   frontend-url: http://127.0.0.1:3000
+  frontend-url-new-user: http://127.0.0.1:3000/settings?newUser=true
