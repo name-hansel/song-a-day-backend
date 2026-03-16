@@ -75,30 +75,28 @@ public class SongService {
         }
     }
 
+    @Transactional
     public SongResponseDTO logSongOfDay(UUID appUserUuid, SongRequestDTO request) {
-        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        LocalDate today = getLocalDateForAppUser(appUserEntity);
-
-        SongEntity songEntity = songRepository
-                .findByAppUserUuidAndSongDate(appUserEntity.getUuid(), today)
-                .orElseGet(() -> {
-                    SongEntity newSongEntity = new SongEntity();
-                    newSongEntity.setAppUser(appUserEntity);
-                    newSongEntity.setSongDate(today);
-
-                    return newSongEntity;
-                });
-
         String trimmedMemory = StringUtils.trim(request.memory());
         if (trimmedMemory != null && trimmedMemory.length() > 160) {
             throw new InvalidDataException("MEMORY");
         }
 
-        songEntity.setMemory(request.memory());
-        songEntity.setSpotifyId(request.spotifyId());
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+        LocalDate today = getLocalDateForAppUser(appUserEntity);
+
+        // Delete old entry
+        deleteSongOfDay(appUserUuid);
+        songRepository.flush();
+
+        SongEntity newSongEntity = new SongEntity();
+        newSongEntity.setAppUser(appUserEntity);
+        newSongEntity.setSongDate(today);
+        newSongEntity.setMemory(trimmedMemory);
+        newSongEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity,
-                songRepository.save(songEntity));
+                songRepository.save(newSongEntity));
     }
 
     @Transactional
