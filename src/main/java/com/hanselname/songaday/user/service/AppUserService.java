@@ -1,5 +1,6 @@
 package com.hanselname.songaday.user.service;
 
+import com.hanselname.songaday.song.service.SongService;
 import com.hanselname.songaday.user.dto.AuthAppUserResponseDTO;
 import com.hanselname.songaday.user.dto.TimezoneResponseDTO;
 import com.hanselname.songaday.user.entity.AppUserEntity;
@@ -22,6 +23,7 @@ public class AppUserService {
 
     private final AppUserRepository appUserRepository;
     private final AppUserMapper appUserMapper;
+    private final SongService songService;
 
     private static final List<String> SUPPORTED_TIMEZONES = List.of("UTC",
             "Europe/London", "Europe/Berlin", "Europe/Paris", "Europe/Moscow",
@@ -42,9 +44,10 @@ public class AppUserService {
         TIMEZONE_RESPONSE_DTOS = Collections.unmodifiableList(list);
     }
 
-    public AppUserService(AppUserRepository appUserRepository, AppUserMapper appUserMapper) {
+    public AppUserService(AppUserRepository appUserRepository, AppUserMapper appUserMapper, SongService songService) {
         this.appUserRepository = appUserRepository;
         this.appUserMapper = appUserMapper;
+        this.songService = songService;
     }
 
     @Transactional
@@ -65,7 +68,8 @@ public class AppUserService {
         AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
                                                        .orElseThrow(
                                                                UserNotFoundException::new);
-        return appUserMapper.toDTO(appUserEntity);
+        return appUserMapper.toDTO(appUserEntity,
+                songService.hasLoggedSongForToday(appUserEntity));
     }
 
     public List<TimezoneResponseDTO> getAllTimezones() {

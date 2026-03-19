@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AppUserMapper {
-    @Mapping(source = "spotifyDisplayName", target = "appUserName")
-    AuthAppUserResponseDTO toDTO(AppUserEntity appUserEntity);
+    @Mapping(source = "appUserEntity.spotifyDisplayName", target = "appUserName")
+    @Mapping(source = "hasLoggedSongForToday", target = "hasLoggedSongToday")
+    AuthAppUserResponseDTO toDTO(AppUserEntity appUserEntity, boolean hasLoggedSongForToday);
 }

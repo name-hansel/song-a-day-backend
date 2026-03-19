@@ -145,6 +145,12 @@ public class SongService {
                 songRepository.save(songEntity));
     }
 
+    public boolean hasLoggedSongForToday(AppUserEntity appUserEntity) {
+        return songRepository
+                .findByAppUserUuidAndSongDate(appUserEntity.getUuid(),
+                        getLocalDateForAppUser(appUserEntity)).isPresent();
+    }
+
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
         TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity,
                 songEntity.getSpotifyId());
