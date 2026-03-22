@@ -18,4 +18,7 @@ public interface SongRepository extends JpaRepository<SongEntity, UUID> {
     List<SongEntity> findByAppUserUuidAndSongDateBetweenOrderBySongDateDesc(UUID appUserUuid, LocalDate startDate, LocalDate endDate);
 
     Optional<SongEntity> findByAppUserUuidAndUuid(UUID appUserUuid, UUID songUuid);
+
+    @Modifying
+    void deleteAllByAppUserUuid(UUID appUserUuid);
 }

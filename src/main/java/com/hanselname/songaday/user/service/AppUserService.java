@@ -70,8 +70,7 @@ public class AppUserService {
 
     public AuthAppUserResponseDTO getAppUser(UUID appUserUuid) {
         AppUserEntity appUserEntity = repository.findById(appUserUuid)
-                .orElseThrow(
-                        UserNotFoundException::new);
+                .orElseThrow(UserNotFoundException::new);
         return appUserMapper.toDTO(appUserEntity,
                 songService.hasLoggedSongForToday(appUserEntity));
     }
@@ -87,6 +86,7 @@ public class AppUserService {
         }
 
         refreshTokenService.deleteRefreshTokens(appUserUuid);
+        songService.deleteSongs(appUserUuid);
         repository.deleteById(appUserUuid);
     }
 

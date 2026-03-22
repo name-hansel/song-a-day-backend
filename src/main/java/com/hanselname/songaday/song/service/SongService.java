@@ -67,9 +67,9 @@ public class SongService {
 
             AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
             return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
-                                         LocalDate.of(year, month, day))
-                                 .map(song -> getSongResponseDTO(appUserEntity,
-                                         song)).orElse(null);
+                            LocalDate.of(year, month, day))
+                    .map(song -> getSongResponseDTO(appUserEntity,
+                            song)).orElse(null);
         } catch (DateTimeException exc) {
             throw new InvalidDateException();
         }
@@ -151,6 +151,10 @@ public class SongService {
                         getLocalDateForAppUser(appUserEntity)).isPresent();
     }
 
+    public void deleteSongs(UUID appUserUuid) {
+        songRepository.deleteAllByAppUserUuid(appUserUuid);
+    }
+
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
         TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity,
                 songEntity.getSpotifyId());
@@ -165,6 +169,6 @@ public class SongService {
 
     private AppUserEntity getAppUserEntityByUuid(UUID appUserUuid) {
         return appUserRepository.findById(appUserUuid)
-                                .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(UserNotFoundException::new);
     }
 }
