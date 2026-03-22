@@ -1,5 +1,6 @@
 package com.hanselname.songaday.user.service;
 
+import com.hanselname.songaday.auth.service.RefreshTokenService;
 import com.hanselname.songaday.song.service.SongService;
 import com.hanselname.songaday.user.dto.AuthAppUserResponseDTO;
 import com.hanselname.songaday.user.dto.TimezoneResponseDTO;
@@ -7,6 +8,7 @@ import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.exception.UserNotFoundException;
 import com.hanselname.songaday.user.mapper.AppUserMapper;
 import com.hanselname.songaday.user.repository.AppUserRepository;
+import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +23,10 @@ import java.util.UUID;
 @Service
 public class AppUserService {
 
-    private final AppUserRepository appUserRepository;
+    private final AppUserRepository repository;
     private final AppUserMapper appUserMapper;
     private final SongService songService;
+    private final RefreshTokenService refreshTokenService;
 
     private static final List<String> SUPPORTED_TIMEZONES = List.of("UTC",
             "Europe/London", "Europe/Berlin", "Europe/Paris", "Europe/Moscow",
@@ -44,17 +47,18 @@ public class AppUserService {
         TIMEZONE_RESPONSE_DTOS = Collections.unmodifiableList(list);
     }
 
-    public AppUserService(AppUserRepository appUserRepository, AppUserMapper appUserMapper, SongService songService) {
-        this.appUserRepository = appUserRepository;
+    public AppUserService(AppUserRepository repository, AppUserMapper appUserMapper, SongService songService, RefreshTokenService refreshTokenService) {
+        this.repository = repository;
         this.appUserMapper = appUserMapper;
         this.songService = songService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
     public TimezoneResponseDTO updateUserTimezone(UUID appUserUuid, String newTimezone) {
-        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
-                                                       .orElseThrow(
-                                                               UserNotFoundException::new);
+        AppUserEntity appUserEntity = repository.findById(appUserUuid)
+                .orElseThrow(
+                        UserNotFoundException::new);
 
         if (!ZoneId.getAvailableZoneIds().contains(newTimezone)) {
             throw new RuntimeException("Invalid timezone");
@@ -65,15 +69,25 @@ public class AppUserService {
     }
 
     public AuthAppUserResponseDTO getAppUser(UUID appUserUuid) {
-        AppUserEntity appUserEntity = appUserRepository.findById(appUserUuid)
-                                                       .orElseThrow(
-                                                               UserNotFoundException::new);
+        AppUserEntity appUserEntity = repository.findById(appUserUuid)
+                .orElseThrow(
+                        UserNotFoundException::new);
         return appUserMapper.toDTO(appUserEntity,
                 songService.hasLoggedSongForToday(appUserEntity));
     }
 
     public List<TimezoneResponseDTO> getAllTimezones() {
         return TIMEZONE_RESPONSE_DTOS;
+    }
+
+    @Transactional
+    public void deleteAppUser(@Nonnull UUID appUserUuid) {
+        if (repository.findById(appUserUuid).isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        refreshTokenService.deleteRefreshTokens(appUserUuid);
+        repository.deleteById(appUserUuid);
     }
 
     private static TimezoneResponseDTO getTimezoneResponseDTO(String zone) {

@@ -5,6 +5,7 @@ import com.hanselname.songaday.user.dto.AppUserTimezoneRequestDTO;
 import com.hanselname.songaday.user.dto.AuthAppUserResponseDTO;
 import com.hanselname.songaday.user.dto.TimezoneResponseDTO;
 import com.hanselname.songaday.user.service.AppUserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,5 +36,11 @@ public class AppUserController {
     public TimezoneResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody AppUserTimezoneRequestDTO request) {
         return appUserService.updateUserTimezone(appUserUuid,
                 request.timezone());
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity<Void> deleteAppUser(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
+        appUserService.deleteAppUser(appUserUuid);
+        return ResponseEntity.noContent().build();
     }
 }
