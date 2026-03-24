@@ -38,7 +38,7 @@ public class AppUserController {
                 request.timezone());
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<Void> deleteAppUser(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
         appUserService.deleteAppUser(appUserUuid);
         return ResponseEntity.noContent().build();
