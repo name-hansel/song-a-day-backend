@@ -29,8 +29,8 @@ public class CommonUtils {
     }
 
     @Named("getFormattedTimeForSong")
-    public static String getFormattedTimeForSong(Instant creationInstant, @Context ZoneId zoneId) {
-        return creationInstant.atZone(zoneId).format(SONG_ADDED_TIME_FORMATTER);
+    public static String getFormattedTimeForSong(Instant instant, @Context ZoneId zoneId) {
+        return instant.atZone(zoneId).format(SONG_ADDED_TIME_FORMATTER);
     }
 
     private CommonUtils() {

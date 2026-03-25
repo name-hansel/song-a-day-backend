@@ -14,5 +14,6 @@ import java.time.ZoneId;
 public interface SongMapper {
     @Mapping(target = "trackInformation", source = "track")
     @Mapping(target = "addedAtTime", source = "songEntity.creatingDate", qualifiedByName = "getFormattedTimeForSong")
+    @Mapping(target = "updatedAtTime", source = "songEntity.updatingDate", qualifiedByName = "getFormattedTimeForSong")
     SongResponseDTO toDTO(SongEntity songEntity, TrackSearchDTO track, @Context ZoneId zoneId);
 }
