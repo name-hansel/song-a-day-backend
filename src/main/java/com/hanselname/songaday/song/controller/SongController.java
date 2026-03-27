@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +44,7 @@ public class SongController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/history")
+    @GetMapping("/weekly-history")
     public List<SongResponseDTO> getSongHistoryForLastWeek(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
         return songService.getSongHistoryForLastWeek(appUserUuid);
     }
@@ -51,5 +52,11 @@ public class SongController {
     @PatchMapping("/memory/{songUuid}")
     public SongResponseDTO updateMemoryForSong(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable UUID songUuid, @RequestBody UpdateMemoryRequestDTO request) {
         return songService.updateMemoryForSong(appUserUuid, songUuid, request);
+    }
+
+    @GetMapping("/history")
+    public List<SongResponseDTO> getSongHistory(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam String beforeDate, @RequestParam int limit) {
+        // TODO: Implement
+        return Collections.emptyList();
     }
 }
