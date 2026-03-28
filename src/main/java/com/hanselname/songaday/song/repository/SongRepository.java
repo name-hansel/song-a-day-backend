@@ -1,6 +1,7 @@
 package com.hanselname.songaday.song.repository;
 
 import com.hanselname.songaday.song.entity.SongEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 
@@ -21,4 +22,8 @@ public interface SongRepository extends JpaRepository<SongEntity, UUID> {
 
     @Modifying
     void deleteAllByAppUserUuid(UUID appUserUuid);
+
+    List<SongEntity> findByAppUserUuidOrderBySongDateDesc(UUID appUserUuid, Pageable pageable);
+
+    List<SongEntity> findByAppUserUuidAndSongDateLessThanOrderBySongDateDesc(UUID appUserUuid, LocalDate date, Pageable pageable);
 }

@@ -1,6 +1,7 @@
 package com.hanselname.songaday.song.controller;
 
 import com.hanselname.songaday.common.utils.CommonUtils;
+import com.hanselname.songaday.song.dto.SongHistoryResponse;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,8 +56,7 @@ public class SongController {
     }
 
     @GetMapping("/history")
-    public List<SongResponseDTO> getSongHistory(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam String beforeDate, @RequestParam int limit) {
-        // TODO: Implement
-        return Collections.emptyList();
+    public SongHistoryResponse getSongHistory(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(required = false) LocalDate beforeDate, @RequestParam(defaultValue = "30") int limit) {
+        return songService.getSongHistory(appUserUuid, beforeDate, limit);
     }
 }

@@ -2,6 +2,7 @@ package com.hanselname.songaday.song.service;
 
 import com.hanselname.songaday.common.exception.exception.InvalidDataException;
 import com.hanselname.songaday.common.utils.StringUtils;
+import com.hanselname.songaday.song.dto.SongHistoryResponse;
 import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
@@ -15,6 +16,7 @@ import com.hanselname.songaday.spotify.service.SpotifyService;
 import com.hanselname.songaday.user.entity.AppUserEntity;
 import com.hanselname.songaday.user.exception.UserNotFoundException;
 import com.hanselname.songaday.user.repository.AppUserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -153,6 +155,32 @@ public class SongService {
 
     public void deleteSongs(UUID appUserUuid) {
         songRepository.deleteAllByAppUserUuid(appUserUuid);
+    }
+
+    public SongHistoryResponse getSongHistory(UUID appUserUuid, LocalDate beforeDate, int limit) {
+        List<SongEntity> songEntities = new ArrayList<>();
+        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+        PageRequest pageRequest = PageRequest.of(0, limit + 1);
+
+        if (beforeDate == null) {
+            songEntities.addAll(
+                    songRepository.findByAppUserUuidOrderBySongDateDesc(appUserUuid, pageRequest));
+        } else {
+            songEntities.addAll(
+                    songRepository.findByAppUserUuidAndSongDateLessThanOrderBySongDateDesc(appUserUuid, beforeDate,
+                            pageRequest));
+        }
+
+        boolean hasMore = songEntities.size() > limit;
+        if (hasMore) {
+            songEntities = songEntities.subList(0, limit);
+        }
+
+        LocalDate nextDate = songEntities.isEmpty() ? null : songEntities.getLast().getSongDate();
+        List<SongResponseDTO> songResponseDTOs = songEntities.stream()
+                .map(song -> getSongResponseDTO(appUserEntity, song)).toList();
+
+        return new SongHistoryResponse(songResponseDTOs, nextDate, hasMore);
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
