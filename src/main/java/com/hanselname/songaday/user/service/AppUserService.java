@@ -55,7 +55,7 @@ public class AppUserService {
     }
 
     @Transactional
-    public TimezoneResponseDTO updateUserTimezone(UUID appUserUuid, String newTimezone) {
+    public AuthAppUserResponseDTO updateUserTimezone(UUID appUserUuid, String newTimezone) {
         AppUserEntity appUserEntity = repository.findById(appUserUuid)
                 .orElseThrow(
                         UserNotFoundException::new);
@@ -65,7 +65,7 @@ public class AppUserService {
         }
 
         appUserEntity.setTimezone(newTimezone);
-        return getTimezoneResponseDTO(newTimezone);
+        return appUserMapper.toDTO(appUserEntity, songService.hasLoggedSongForToday(appUserEntity));
     }
 
     public AuthAppUserResponseDTO getAppUser(UUID appUserUuid) {

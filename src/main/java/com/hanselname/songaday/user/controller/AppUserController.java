@@ -33,7 +33,7 @@ public class AppUserController {
     }
 
     @PatchMapping("/timezone")
-    public TimezoneResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody AppUserTimezoneRequestDTO request) {
+    public AuthAppUserResponseDTO updateUserTimezone(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestBody AppUserTimezoneRequestDTO request) {
         return appUserService.updateUserTimezone(appUserUuid,
                 request.timezone());
     }
