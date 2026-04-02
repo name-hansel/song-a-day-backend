@@ -15,7 +15,9 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig().serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json())).entryTtl(Duration.ofDays(7));
+        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(RedisSerializer.json()))
+                .entryTtl(Duration.ofDays(7));
         return RedisCacheManager.builder(factory).cacheDefaults(redisCacheConfiguration).build();
     }
 }
