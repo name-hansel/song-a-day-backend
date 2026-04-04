@@ -1,5 +1,6 @@
 package com.hanselname.songaday.song.service;
 
+import com.hanselname.songaday.common.exception.exception.ActionNotAllowedException;
 import com.hanselname.songaday.common.exception.exception.InvalidDataException;
 import com.hanselname.songaday.common.utils.StringUtils;
 import com.hanselname.songaday.song.dto.SongHistoryResponse;
@@ -136,6 +137,11 @@ public class SongService {
         SongEntity songEntity = songRepository
                 .findByAppUserUuidAndUuid(appUserUuid, songUuid)
                 .orElseThrow(SongNotFoundException::new);
+
+        LocalDate today = getLocalDateForAppUser(appUserEntity);
+        if (!today.equals(songEntity.getSongDate())) {
+            throw new ActionNotAllowedException();
+        }
 
         String trimmedMemory = StringUtils.trim(request.updatedMemory());
         if (trimmedMemory != null && trimmedMemory.length() > 160) {
