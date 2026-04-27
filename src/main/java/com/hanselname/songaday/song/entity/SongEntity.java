@@ -25,7 +25,7 @@ public class SongEntity extends AbstractEntity {
     @Column(nullable = false)
     private LocalDate songDate;
 
-    @Column(length = 160)
+    @Column(length = 200)
     private String memory;
 
     public UUID getUuid() {

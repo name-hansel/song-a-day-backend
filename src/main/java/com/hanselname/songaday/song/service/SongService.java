@@ -12,6 +12,7 @@ import com.hanselname.songaday.song.exception.InvalidDateException;
 import com.hanselname.songaday.song.exception.SongNotFoundException;
 import com.hanselname.songaday.song.mapper.SongMapper;
 import com.hanselname.songaday.song.repository.SongRepository;
+import com.hanselname.songaday.song.utils.SongUtils;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.service.SpotifyService;
 import com.hanselname.songaday.user.entity.AppUserEntity;
@@ -69,10 +70,8 @@ public class SongService {
             int day = Integer.parseInt(dateComponents[2]);
 
             AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-            return songRepository.findByAppUserUuidAndSongDate(appUserUuid,
-                            LocalDate.of(year, month, day))
-                    .map(song -> getSongResponseDTO(appUserEntity,
-                            song)).orElse(null);
+            return songRepository.findByAppUserUuidAndSongDate(appUserUuid, LocalDate.of(year, month, day))
+                    .map(song -> getSongResponseDTO(appUserEntity, song)).orElse(null);
         } catch (DateTimeException exc) {
             throw new InvalidDateException();
         }
@@ -81,7 +80,7 @@ public class SongService {
     @Transactional
     public SongResponseDTO logSongOfDay(UUID appUserUuid, SongRequestDTO request) {
         String trimmedMemory = StringUtils.trim(request.memory());
-        if (trimmedMemory != null && trimmedMemory.length() > 160) {
+        if (SongUtils.isSongMemoryInvalid(trimmedMemory)) {
             throw new InvalidDataException("MEMORY");
         }
 
@@ -105,8 +104,7 @@ public class SongService {
     @Transactional
     public void deleteSongOfDay(UUID appUserUuid) {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        songRepository.deleteByAppUserUuidAndSongDate(appUserEntity.getUuid(),
-                getLocalDateForAppUser(appUserEntity));
+        songRepository.deleteByAppUserUuidAndSongDate(appUserEntity.getUuid(), getLocalDateForAppUser(appUserEntity));
     }
 
     public List<SongResponseDTO> getSongHistoryForLastWeek(UUID appUserUuid) {
@@ -114,19 +112,16 @@ public class SongService {
         LocalDate today = getLocalDateForAppUser(appUserEntity);
         LocalDate startDate = today.minusDays(6);
 
-        Map<LocalDate, SongEntity> songEntityMap = songRepository
-                .findByAppUserUuidAndSongDateBetweenOrderBySongDateDesc(
-                        appUserUuid, startDate, today).stream().collect(
-                        Collectors.toMap(SongEntity::getSongDate,
-                                Function.identity()));
+        Map<LocalDate, SongEntity> songEntityMap = songRepository.findByAppUserUuidAndSongDateBetweenOrderBySongDateDesc(
+                        appUserUuid, startDate, today).stream()
+                .collect(Collectors.toMap(SongEntity::getSongDate, Function.identity()));
 
         List<SongResponseDTO> result = new ArrayList<>();
 
         for (int i = 6; i >= 0; i--) {
             LocalDate date = today.minusDays(i);
             SongEntity songEntity = songEntityMap.get(date);
-            result.add(songEntity != null ? getSongResponseDTO(appUserEntity,
-                    songEntity) : null);
+            result.add(songEntity != null ? getSongResponseDTO(appUserEntity, songEntity) : null);
         }
 
         return result;
@@ -134,8 +129,7 @@ public class SongService {
 
     public SongResponseDTO updateMemoryForSong(UUID appUserUuid, UUID songUuid, UpdateMemoryRequestDTO request) {
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        SongEntity songEntity = songRepository
-                .findByAppUserUuidAndUuid(appUserUuid, songUuid)
+        SongEntity songEntity = songRepository.findByAppUserUuidAndUuid(appUserUuid, songUuid)
                 .orElseThrow(SongNotFoundException::new);
 
         LocalDate today = getLocalDateForAppUser(appUserEntity);
@@ -144,19 +138,18 @@ public class SongService {
         }
 
         String trimmedMemory = StringUtils.trim(request.updatedMemory());
-        if (trimmedMemory != null && trimmedMemory.length() > 160) {
+        if (SongUtils.isSongMemoryInvalid(trimmedMemory)) {
             throw new InvalidDataException("MEMORY");
         }
-        songEntity.setMemory(request.updatedMemory());
 
-        return getSongResponseDTO(appUserEntity,
-                songRepository.save(songEntity));
+        songEntity.setMemory(trimmedMemory);
+
+        return getSongResponseDTO(appUserEntity, songRepository.save(songEntity));
     }
 
     public boolean hasLoggedSongForToday(AppUserEntity appUserEntity) {
-        return songRepository
-                .findByAppUserUuidAndSongDate(appUserEntity.getUuid(),
-                        getLocalDateForAppUser(appUserEntity)).isPresent();
+        return songRepository.findByAppUserUuidAndSongDate(appUserEntity.getUuid(),
+                getLocalDateForAppUser(appUserEntity)).isPresent();
     }
 
     public void deleteSongs(UUID appUserUuid) {
@@ -169,8 +162,7 @@ public class SongService {
         PageRequest pageRequest = PageRequest.of(0, limit + 1);
 
         if (beforeDate == null) {
-            songEntities.addAll(
-                    songRepository.findByAppUserUuidOrderBySongDateDesc(appUserUuid, pageRequest));
+            songEntities.addAll(songRepository.findByAppUserUuidOrderBySongDateDesc(appUserUuid, pageRequest));
         } else {
             songEntities.addAll(
                     songRepository.findByAppUserUuidAndSongDateLessThanOrderBySongDateDesc(appUserUuid, beforeDate,
@@ -190,19 +182,16 @@ public class SongService {
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
-        TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity,
-                songEntity.getSpotifyId());
+        TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity, songEntity.getSpotifyId());
 
         if (track == null) {
             throw new RuntimeException("Song not found on Spotify.");
         }
 
-        return songMapper.toDTO(songEntity, track,
-                ZoneId.of(appUserEntity.getTimezone()));
+        return songMapper.toDTO(songEntity, track, ZoneId.of(appUserEntity.getTimezone()));
     }
 
     private AppUserEntity getAppUserEntityByUuid(UUID appUserUuid) {
-        return appUserRepository.findById(appUserUuid)
-                .orElseThrow(UserNotFoundException::new);
+        return appUserRepository.findById(appUserUuid).orElseThrow(UserNotFoundException::new);
     }
 }
