@@ -26,4 +26,6 @@ public interface SongRepository extends JpaRepository<SongEntity, UUID> {
     List<SongEntity> findByAppUserUuidOrderBySongDateDesc(UUID appUserUuid, Pageable pageable);
 
     List<SongEntity> findByAppUserUuidAndSongDateLessThanOrderBySongDateDesc(UUID appUserUuid, LocalDate date, Pageable pageable);
+
+    List<SongEntity> findByAppUserUuidAndSongDateGreaterThanOrderBySongDateAsc(UUID appUserUuid, LocalDate date, Pageable pageable);
 }

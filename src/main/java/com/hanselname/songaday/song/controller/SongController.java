@@ -56,7 +56,7 @@ public class SongController {
     }
 
     @GetMapping("/history")
-    public SongHistoryResponse getSongHistory(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(required = false) LocalDate beforeDate, @RequestParam(defaultValue = "10") int limit) {
-        return songService.getSongHistory(appUserUuid, beforeDate, limit);
+    public SongHistoryResponse getSongHistory(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(required = false) LocalDate beforeDate, @RequestParam(required = false) LocalDate afterDate, @RequestParam(defaultValue = "10") int limit) {
+        return songService.getSongHistory(appUserUuid, beforeDate, afterDate, limit);
     }
 }

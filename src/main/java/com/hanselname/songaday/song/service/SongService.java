@@ -25,10 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -156,29 +153,78 @@ public class SongService {
         songRepository.deleteAllByAppUserUuid(appUserUuid);
     }
 
-    public SongHistoryResponse getSongHistory(UUID appUserUuid, LocalDate beforeDate, int limit) {
-        List<SongEntity> songEntities = new ArrayList<>();
+    public SongHistoryResponse getSongHistory(UUID appUserUuid, LocalDate beforeDate, LocalDate afterDate, int limit) {
+        if (beforeDate != null && afterDate != null) {
+            throw new ActionNotAllowedException();
+        }
+
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
+
+        // Next
+        if (beforeDate != null) {
+            return getOlder(appUserEntity, beforeDate, limit);
+        }
+
+        // Previous
+        if (afterDate != null) {
+            return getNewer(appUserEntity, afterDate, limit);
+        }
+
+        return getLatest(appUserEntity, limit);
+    }
+
+    private SongHistoryResponse getLatest(AppUserEntity appUserEntity, int limit) {
         PageRequest pageRequest = PageRequest.of(0, limit + 1);
+        List<SongEntity> songEntities = songRepository.findByAppUserUuidOrderBySongDateDesc(appUserEntity.getUuid(),
+                pageRequest);
+        boolean hasMoreNext = checkIfHasMoreAndPrune(songEntities, limit);
 
-        if (beforeDate == null) {
-            songEntities.addAll(songRepository.findByAppUserUuidOrderBySongDateDesc(appUserUuid, pageRequest));
-        } else {
-            songEntities.addAll(
-                    songRepository.findByAppUserUuidAndSongDateLessThanOrderBySongDateDesc(appUserUuid, beforeDate,
-                            pageRequest));
+        return new SongHistoryResponse(getSongResponseDTOs(songEntities, appUserEntity), getNextDate(songEntities),
+                null, hasMoreNext, false);
+    }
+
+    private SongHistoryResponse getOlder(AppUserEntity appUserEntity, LocalDate beforeDate, int limit) {
+        PageRequest pageRequest = PageRequest.of(0, limit + 1);
+        List<SongEntity> songEntities = songRepository.findByAppUserUuidAndSongDateLessThanOrderBySongDateDesc(
+                appUserEntity.getUuid(), beforeDate, pageRequest);
+
+        boolean hasMoreNext = checkIfHasMoreAndPrune(songEntities, limit);
+
+        return new SongHistoryResponse(getSongResponseDTOs(songEntities, appUserEntity), getNextDate(songEntities),
+                getPreviousDate(songEntities), hasMoreNext, true);
+    }
+
+    private SongHistoryResponse getNewer(AppUserEntity appUserEntity, LocalDate afterDate, int limit) {
+        PageRequest pageRequest = PageRequest.of(0, limit + 1);
+        List<SongEntity> songEntities = songRepository.findByAppUserUuidAndSongDateGreaterThanOrderBySongDateAsc(
+                appUserEntity.getUuid(), afterDate, pageRequest);
+        
+        Collections.reverse(songEntities);
+        boolean hasMorePrevious = checkIfHasMoreAndPrune(songEntities, limit);
+
+        return new SongHistoryResponse(getSongResponseDTOs(songEntities, appUserEntity), getNextDate(songEntities),
+                getPreviousDate(songEntities), true, hasMorePrevious);
+    }
+
+    private List<SongResponseDTO> getSongResponseDTOs(Collection<SongEntity> songEntities, AppUserEntity appUserEntity) {
+        return songEntities.stream().map(song -> getSongResponseDTO(appUserEntity, song)).toList();
+    }
+
+    private LocalDate getNextDate(List<SongEntity> songEntities) {
+        return songEntities.isEmpty() ? null : songEntities.getLast().getSongDate();
+    }
+
+    private LocalDate getPreviousDate(List<SongEntity> songEntities) {
+        return songEntities.isEmpty() ? null : songEntities.getFirst().getSongDate();
+    }
+
+    private boolean checkIfHasMoreAndPrune(List<SongEntity> songEntities, int limit) {
+        boolean hasMoreNext = songEntities.size() > limit;
+        if (hasMoreNext) {
+            songEntities.removeLast();
         }
 
-        boolean hasMore = songEntities.size() > limit;
-        if (hasMore) {
-            songEntities = songEntities.subList(0, limit);
-        }
-
-        LocalDate nextDate = songEntities.isEmpty() ? null : songEntities.getLast().getSongDate();
-        List<SongResponseDTO> songResponseDTOs = songEntities.stream()
-                .map(song -> getSongResponseDTO(appUserEntity, song)).toList();
-
-        return new SongHistoryResponse(songResponseDTOs, nextDate, hasMore);
+        return hasMoreNext;
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
