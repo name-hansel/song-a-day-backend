@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public record TrackSearchDTO(String spotifyId, String trackName,
                              String artistName, String albumName,
-                             String spotifyUrl, String largeImageUrl,
+                             String spotifyUrl, String largeImageUrl, String mediumImageUrl,
                              String smallImageUrl) implements Serializable {
 }

@@ -1,4 +1,6 @@
 package com.hanselname.songaday.song.dto;
 
-public record SongRequestDTO(String spotifyId, String memory) {
+import java.time.LocalDate;
+
+public record SongRequestDTO(String spotifyId, String memory, LocalDate date) {
 }

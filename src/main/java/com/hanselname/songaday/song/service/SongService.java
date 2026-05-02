@@ -82,17 +82,19 @@ public class SongService {
         }
 
         AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        LocalDate today = getLocalDateForAppUser(appUserEntity);
+        LocalDate date = request.date();
 
-        SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserUuid, today).orElseGet(() -> {
+        SongEntity songEntity = songRepository.findByAppUserUuidAndSongDate(appUserUuid, date).orElseGet(() -> {
             SongEntity newSongEntity = new SongEntity();
             newSongEntity.setAppUser(appUserEntity);
-            newSongEntity.setSongDate(today);
+            newSongEntity.setSongDate(date);
 
             return newSongEntity;
         });
 
-        songEntity.setMemory(trimmedMemory);
+        if (trimmedMemory != null) {
+            songEntity.setMemory(trimmedMemory);
+        }
         songEntity.setSpotifyId(request.spotifyId());
 
         return getSongResponseDTO(appUserEntity, songRepository.save(songEntity));
@@ -198,7 +200,7 @@ public class SongService {
         PageRequest pageRequest = PageRequest.of(0, limit + 1);
         List<SongEntity> songEntities = songRepository.findByAppUserUuidAndSongDateGreaterThanOrderBySongDateAsc(
                 appUserEntity.getUuid(), afterDate, pageRequest);
-        
+
         Collections.reverse(songEntities);
         boolean hasMorePrevious = checkIfHasMoreAndPrune(songEntities, limit);
 
