@@ -39,9 +39,9 @@ public class SongController {
         return songService.logSongOfDay(appUserUuid, request);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deleteSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid) {
-        songService.deleteSongOfDay(appUserUuid);
+    @DeleteMapping("/{songUuid}")
+    public ResponseEntity<Void> deleteSongOfDay(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable UUID songUuid) {
+        songService.deleteSongOfDay(appUserUuid, songUuid);
         return ResponseEntity.noContent().build();
     }
 

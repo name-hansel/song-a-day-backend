@@ -101,9 +101,10 @@ public class SongService {
     }
 
     @Transactional
-    public void deleteSongOfDay(UUID appUserUuid) {
-        AppUserEntity appUserEntity = getAppUserEntityByUuid(appUserUuid);
-        songRepository.deleteByAppUserUuidAndSongDate(appUserEntity.getUuid(), getLocalDateForAppUser(appUserEntity));
+    public void deleteSongOfDay(UUID appUserUuid, UUID songUuid) {
+        SongEntity songEntity = songRepository.findByAppUserUuidAndUuid(appUserUuid, songUuid)
+                .orElseThrow(SongNotFoundException::new);
+        songRepository.delete(songEntity);
     }
 
     public List<SongResponseDTO> getSongHistoryForLastWeek(UUID appUserUuid) {

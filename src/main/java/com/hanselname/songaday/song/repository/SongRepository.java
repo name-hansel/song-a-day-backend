@@ -13,9 +13,6 @@ import java.util.UUID;
 public interface SongRepository extends JpaRepository<SongEntity, UUID> {
     Optional<SongEntity> findByAppUserUuidAndSongDate(UUID appUserUuid, LocalDate date);
 
-    @Modifying
-    void deleteByAppUserUuidAndSongDate(UUID appUserUuid, LocalDate date);
-
     List<SongEntity> findByAppUserUuidAndSongDateBetweenOrderBySongDateDesc(UUID appUserUuid, LocalDate startDate, LocalDate endDate);
 
     Optional<SongEntity> findByAppUserUuidAndUuid(UUID appUserUuid, UUID songUuid);
