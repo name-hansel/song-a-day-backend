@@ -5,6 +5,8 @@ import com.hanselname.songaday.spotify.service.SpotifyService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,5 +27,10 @@ public class SpotifyController {
     @GetMapping("/search-track/{spotifyId}")
     public TrackSearchDTO searchForTrack(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @PathVariable String spotifyId) {
         return spotifyService.getTrackBySpotifyId(appUserUuid, spotifyId);
+    }
+
+    @GetMapping("/recently-played-tracks/{date}")
+    public List<TrackSearchDTO> getRecentlyPlayedTracksForDate(@AuthenticationPrincipal(expression = "uuid") UUID appUserUuid, @RequestParam(defaultValue = "5") int limit, @PathVariable LocalDate date) {
+        return Collections.emptyList();
     }
 }
