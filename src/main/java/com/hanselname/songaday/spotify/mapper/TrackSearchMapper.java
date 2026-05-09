@@ -9,13 +9,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface TrackSearchMapper {
-    @Mapping(source = "id", target = "spotifyId")
+    @Mapping(source = "id", target = "spotifyTrackId")
     @Mapping(source = "name", target = "trackName")
+    @Mapping(source = "album.id", target = "spotifyAlbumId")
     @Mapping(source = "album.name", target = "albumName")
+    @Mapping(target = "spotifyArtistIds", expression = "java(getArtistIds(track))")
     @Mapping(target = "artistName", expression = "java(getArtistName(track))")
     @Mapping(target = "largeImageUrl", expression = "java(getLargeImage(track))")
     @Mapping(target = "mediumImageUrl", expression = "java(getMediumImage(track))")
@@ -24,6 +27,10 @@ public interface TrackSearchMapper {
     TrackSearchDTO toDTO(TrackSearch track);
 
     List<TrackSearchDTO> toDTOList(List<TrackSearch> tracks);
+
+    default Set<String> getArtistIds(TrackSearch track) {
+        return track.getArtists().stream().map(ArtistSearch::getId).collect(Collectors.toSet());
+    }
 
     default String getArtistName(TrackSearch track) {
         return track.getArtists().stream().map(ArtistSearch::getName)

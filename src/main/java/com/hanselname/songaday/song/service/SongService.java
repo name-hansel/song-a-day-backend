@@ -8,10 +8,12 @@ import com.hanselname.songaday.song.dto.SongRequestDTO;
 import com.hanselname.songaday.song.dto.SongResponseDTO;
 import com.hanselname.songaday.song.dto.UpdateMemoryRequestDTO;
 import com.hanselname.songaday.song.entity.SongEntity;
+import com.hanselname.songaday.song.entity.TrackInformationEntity;
 import com.hanselname.songaday.song.exception.InvalidDateException;
 import com.hanselname.songaday.song.exception.SongNotFoundException;
 import com.hanselname.songaday.song.mapper.SongMapper;
 import com.hanselname.songaday.song.repository.SongRepository;
+import com.hanselname.songaday.song.repository.TrackInformationRepository;
 import com.hanselname.songaday.song.utils.SongUtils;
 import com.hanselname.songaday.spotify.dto.TrackSearchDTO;
 import com.hanselname.songaday.spotify.service.SpotifyService;
@@ -38,13 +40,15 @@ public class SongService {
 
     private final SongRepository songRepository;
     private final AppUserRepository appUserRepository;
+    private final TrackInformationRepository trackInformationRepository;
 
     private final SongMapper songMapper;
 
-    public SongService(SpotifyService spotifyService, SongRepository songRepository, AppUserRepository appUserRepository, SongMapper songMapper) {
+    public SongService(SpotifyService spotifyService, SongRepository songRepository, AppUserRepository appUserRepository, TrackInformationRepository trackInformationRepository, SongMapper songMapper) {
         this.spotifyService = spotifyService;
         this.songRepository = songRepository;
         this.appUserRepository = appUserRepository;
+        this.trackInformationRepository = trackInformationRepository;
         this.songMapper = songMapper;
     }
 
@@ -95,9 +99,22 @@ public class SongService {
         if (trimmedMemory != null) {
             songEntity.setMemory(trimmedMemory);
         }
-        songEntity.setSpotifyId(request.spotifyId());
 
-        return getSongResponseDTO(appUserEntity, songRepository.save(songEntity));
+        songEntity.setSpotifyId(request.spotifyId());
+        TrackSearchDTO trackSearchDTO = getTrackBySpotifyId(appUserEntity, request.spotifyId());
+
+        TrackInformationEntity trackInformationEntity = trackInformationRepository.findById(request.spotifyId())
+                .orElseGet(() -> {
+                    TrackInformationEntity newTrackInformationEntity = new TrackInformationEntity();
+                    newTrackInformationEntity.setSpotifyTrackId(trackSearchDTO.spotifyTrackId());
+                    newTrackInformationEntity.setSpotifyAlbumId(trackSearchDTO.spotifyAlbumId());
+                    newTrackInformationEntity.setSpotifyArtistIds(trackSearchDTO.spotifyArtistIds());
+
+                    return trackInformationRepository.save(newTrackInformationEntity);
+                });
+        songEntity.setTrackInformation(trackInformationEntity);
+
+        return getSongResponseDTO(appUserEntity, songRepository.save(songEntity), trackSearchDTO);
     }
 
     @Transactional
@@ -226,13 +243,22 @@ public class SongService {
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
-        TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity, songEntity.getSpotifyId());
+        return getSongResponseDTO(appUserEntity, songEntity,
+                getTrackBySpotifyId(appUserEntity, songEntity.getSpotifyId()));
+    }
+
+    private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity, TrackSearchDTO trackSearchDTO) {
+        return songMapper.toDTO(songEntity, trackSearchDTO, ZoneId.of(appUserEntity.getTimezone()));
+    }
+
+    private TrackSearchDTO getTrackBySpotifyId(AppUserEntity appUserEntity, String spotifyId) {
+        TrackSearchDTO track = spotifyService.getTrackBySpotifyId(appUserEntity, spotifyId);
 
         if (track == null) {
             throw new RuntimeException("Song not found on Spotify.");
         }
 
-        return songMapper.toDTO(songEntity, track, ZoneId.of(appUserEntity.getTimezone()));
+        return track;
     }
 
     private AppUserEntity getAppUserEntityByUuid(UUID appUserUuid) {

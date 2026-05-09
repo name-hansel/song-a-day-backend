@@ -29,7 +29,9 @@ public class SongEntity extends AbstractEntity {
     @Column(length = 200)
     private String memory;
 
-    @ManyToOne(optional = false)
+    // TODO: Uncomment after all entries contain track info
+//    @ManyToOne(optional = false)
+    @ManyToOne
     private TrackInformationEntity trackInformation;
 
     public UUID getUuid() {
@@ -70,5 +72,13 @@ public class SongEntity extends AbstractEntity {
 
     public void setMemory(String memory) {
         this.memory = memory;
+    }
+
+    public TrackInformationEntity getTrackInformation() {
+        return trackInformation;
+    }
+
+    public void setTrackInformation(TrackInformationEntity trackInformation) {
+        this.trackInformation = trackInformation;
     }
 }

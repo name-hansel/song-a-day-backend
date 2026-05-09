@@ -5,8 +5,13 @@ import com.hanselname.songaday.spotify.response_model.Image;
 import java.util.List;
 
 public class AlbumSearch {
+    private String id;
     private String name;
     private List<Image> images;
+
+    public String getId() {
+        return id;
+    }
 
     public String getName() {
         return name;
