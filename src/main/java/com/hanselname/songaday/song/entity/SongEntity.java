@@ -19,6 +19,7 @@ public class SongEntity extends AbstractEntity {
     @JoinColumn(name = "app_user_entity_uuid", nullable = false)
     private AppUserEntity appUser;
 
+    // TODO: Remove after all entries contain track info
     @Column(nullable = false)
     private String spotifyId;
 
@@ -27,6 +28,9 @@ public class SongEntity extends AbstractEntity {
 
     @Column(length = 200)
     private String memory;
+
+    @ManyToOne(optional = false)
+    private TrackInformationEntity trackInformation;
 
     public UUID getUuid() {
         return uuid;
