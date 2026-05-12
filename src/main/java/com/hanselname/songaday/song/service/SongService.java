@@ -100,7 +100,6 @@ public class SongService {
             songEntity.setMemory(trimmedMemory);
         }
 
-        songEntity.setSpotifyId(request.spotifyId());
         TrackSearchDTO trackSearchDTO = getTrackBySpotifyId(appUserEntity, request.spotifyId());
 
         TrackInformationEntity trackInformationEntity = trackInformationRepository.findById(request.spotifyId())
@@ -244,7 +243,7 @@ public class SongService {
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity) {
         return getSongResponseDTO(appUserEntity, songEntity,
-                getTrackBySpotifyId(appUserEntity, songEntity.getSpotifyId()));
+                getTrackBySpotifyId(appUserEntity, songEntity.getTrackInformation().getSpotifyTrackId()));
     }
 
     private SongResponseDTO getSongResponseDTO(AppUserEntity appUserEntity, SongEntity songEntity, TrackSearchDTO trackSearchDTO) {

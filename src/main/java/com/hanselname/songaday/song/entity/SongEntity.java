@@ -19,19 +19,13 @@ public class SongEntity extends AbstractEntity {
     @JoinColumn(name = "app_user_entity_uuid", nullable = false)
     private AppUserEntity appUser;
 
-    // TODO: Remove after all entries contain track info
-    @Column(nullable = false)
-    private String spotifyId;
-
     @Column(nullable = false)
     private LocalDate songDate;
 
     @Column(length = 200)
     private String memory;
 
-    // TODO: Uncomment after all entries contain track info
-//    @ManyToOne(optional = false)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private TrackInformationEntity trackInformation;
 
     public UUID getUuid() {
@@ -48,14 +42,6 @@ public class SongEntity extends AbstractEntity {
 
     public void setAppUser(AppUserEntity appUser) {
         this.appUser = appUser;
-    }
-
-    public String getSpotifyId() {
-        return spotifyId;
-    }
-
-    public void setSpotifyId(String spotifyId) {
-        this.spotifyId = spotifyId;
     }
 
     public LocalDate getSongDate() {
