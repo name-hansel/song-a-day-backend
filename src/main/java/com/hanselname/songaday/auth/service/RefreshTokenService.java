@@ -37,18 +37,18 @@ public class RefreshTokenService {
     }
 
     public UUID validateRefreshToken(String token) {
-        RefreshTokenEntity responseTokenEntity = repository.findById(jwtService.extractJtiFromRefreshToken(token))
+        RefreshTokenEntity refreshTokenEntity = repository.findById(jwtService.extractJtiFromRefreshToken(token))
                 .orElseThrow(InvalidRefreshTokenException::new);
 
-        if (responseTokenEntity.getExpiresAt().isBefore(Instant.now())) {
+        if (refreshTokenEntity.getExpiresAt().isBefore(Instant.now())) {
             throw new RefreshTokenExpiredException();
         }
 
-        if (!hashToken(token).equals(responseTokenEntity.getTokenHash())) {
+        if (!hashToken(token).equals(refreshTokenEntity.getTokenHash())) {
             throw new InvalidRefreshTokenException();
         }
 
-        return responseTokenEntity.getAppUserUuid();
+        return refreshTokenEntity.getAppUserUuid();
     }
 
     public void deleteRefreshToken(String oldToken) {
